@@ -2,7 +2,7 @@
   "name": "@profitmaker/ui",
   "version": "0.2.1",
   "description": "Trading-focused React component library behind profitmaker.cc — primitives plus live trading widgets (order book, order form, portfolio, deals list).",
-  "license": "MIT",
+  "license": "Unlicense",
   "type": "module",
   "sideEffects": [
     "**/*.css"
@@ -10,7 +10,8 @@
   "files": [
     "dist",
     "tailwind-preset.cjs",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "exports": {
     ".": {
@@ -191,11 +192,11 @@
     "tailwind-merge": "^2.5.2"
   },
   "devDependencies": {
-    "tsup": "^8.3.0",
-    "typescript": "^5",
-    "esbuild-plugin-preserve-directives": "^0.0.11",
     "@types/react": "^19",
-    "@types/react-dom": "^19"
+    "@types/react-dom": "^19",
+    "esbuild-plugin-preserve-directives": "^0.0.11",
+    "tsup": "^8.3.0",
+    "typescript": "^5"
   },
   "publishConfig": {
     "access": "public"

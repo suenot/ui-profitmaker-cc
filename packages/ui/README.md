@@ -49,4 +49,4 @@ const OrderBook = dynamic(() => import('@profitmaker/ui/order-book').then((m) =>
 
 ## License
 
-MIT
+[The Unlicense](https://unlicense.org) — public domain.
