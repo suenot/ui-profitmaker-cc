@@ -1,41 +1,46 @@
+'use client'
+
 import Link from 'next/link'
-import { ThemeToggle } from './theme-toggle'
-import { Logo } from './logo'
 import { Github } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Logo } from '@/components/site/logo'
+import { ThemeToggle } from '@/components/site/theme-toggle'
+
+const navLinks = [
+  { href: '/', label: 'Home' },
+  { href: '/docs', label: 'Components' },
+  { href: '/storybook', label: 'Storybook' },
+]
+
+const GITHUB_URL = 'https://github.com/profitmaker/ui-profitmaker-cc'
 
 export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-xl">
-      <div className="container mx-auto px-4 flex h-16 items-center justify-between">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-8">
-          <Link href="/" className="group flex items-center gap-2.5">
-            <div className="relative w-8 h-8 text-foreground">
-              <div className="absolute inset-0 bg-accent/20 rounded-full blur-md group-hover:bg-accent/40 transition-colors" />
-              <Logo className="relative w-full h-full" />
-            </div>
-            <span className="font-black text-lg tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-              ui.profitmaker.cc
-            </span>
+          <Link href="/" aria-label="ui.profitmaker.cc home">
+            <Logo />
           </Link>
-          <nav className="hidden md:flex items-center gap-6">
-            <Link href="/docs" className="text-sm font-bold text-muted-foreground hover:text-foreground transition-colors uppercase tracking-widest">
-              Docs
-            </Link>
-            <a href="/storybook" className="text-sm font-bold text-muted-foreground hover:text-accent transition-colors uppercase tracking-widest">
-              Components
-            </a>
+          <nav className="hidden items-center gap-6 md:flex">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {link.label}
+              </Link>
+            ))}
           </nav>
         </div>
         <div className="flex items-center gap-2">
-          <a
-            href="https://github.com/suenot/ui-profitmaker-cc"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-2 rounded-xl hover:bg-accent/10 transition-colors text-muted-foreground hover:text-foreground"
-          >
-            <Github size={20} />
-          </a>
           <ThemeToggle />
+          <Button asChild variant="ghost" size="icon" aria-label="GitHub repository">
+            <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
+              <Github className="h-5 w-5" />
+            </a>
+          </Button>
         </div>
       </div>
     </header>

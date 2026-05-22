@@ -3,7 +3,6 @@ import {
   Table,
   TableHeader,
   TableBody,
-  TableFooter,
   TableHead,
   TableRow,
   TableCell,
@@ -14,46 +13,38 @@ const meta: Meta<typeof Table> = {
   title: 'UI/Table',
   component: Table,
   parameters: { layout: 'centered' },
-  tags: ['autodocs'],
 }
-
 export default meta
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<typeof Table>
 
-const orders = [
-  { id: 'BTC/USDT', side: 'Buy', size: '0.50', price: '64,210' },
-  { id: 'ETH/USDT', side: 'Sell', size: '4.20', price: '3,180' },
-  { id: 'SOL/USDT', side: 'Buy', size: '120', price: '148.50' },
+const invoices = [
+  { invoice: 'INV001', status: 'Paid', method: 'Credit Card', amount: '$250.00' },
+  { invoice: 'INV002', status: 'Pending', method: 'PayPal', amount: '$150.00' },
+  { invoice: 'INV003', status: 'Unpaid', method: 'Bank Transfer', amount: '$350.00' },
 ]
 
 export const Default: Story = {
   render: () => (
-    <Table className="w-[28rem] text-foreground">
-      <TableCaption>Open orders across connected exchanges.</TableCaption>
+    <Table className="w-[480px]">
+      <TableCaption>A list of your recent invoices.</TableCaption>
       <TableHeader>
         <TableRow>
-          <TableHead>Pair</TableHead>
-          <TableHead>Side</TableHead>
-          <TableHead>Size</TableHead>
-          <TableHead className="text-right">Price</TableHead>
+          <TableHead>Invoice</TableHead>
+          <TableHead>Status</TableHead>
+          <TableHead>Method</TableHead>
+          <TableHead className="text-right">Amount</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {orders.map((o) => (
-          <TableRow key={o.id}>
-            <TableCell className="font-medium">{o.id}</TableCell>
-            <TableCell>{o.side}</TableCell>
-            <TableCell>{o.size}</TableCell>
-            <TableCell className="text-right">{o.price}</TableCell>
+        {invoices.map((row) => (
+          <TableRow key={row.invoice}>
+            <TableCell className="font-medium">{row.invoice}</TableCell>
+            <TableCell>{row.status}</TableCell>
+            <TableCell>{row.method}</TableCell>
+            <TableCell className="text-right">{row.amount}</TableCell>
           </TableRow>
         ))}
       </TableBody>
-      <TableFooter>
-        <TableRow>
-          <TableCell colSpan={3}>Total orders</TableCell>
-          <TableCell className="text-right">3</TableCell>
-        </TableRow>
-      </TableFooter>
     </Table>
   ),
 }

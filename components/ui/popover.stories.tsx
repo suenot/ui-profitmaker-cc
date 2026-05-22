@@ -1,16 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { Popover, PopoverTrigger, PopoverContent } from './popover'
 import { Button } from './button'
+import { Label } from './label'
+import { Input } from './input'
 
-const meta: Meta = {
+const meta: Meta<typeof Popover> = {
   title: 'UI/Popover',
   component: Popover,
   parameters: { layout: 'centered' },
-  tags: ['autodocs'],
 }
-
 export default meta
-type Story = StoryObj
+type Story = StoryObj<typeof Popover>
 
 export const Default: Story = {
   render: () => (
@@ -18,12 +18,10 @@ export const Default: Story = {
       <PopoverTrigger asChild>
         <Button variant="outline">Open Popover</Button>
       </PopoverTrigger>
-      <PopoverContent className="text-foreground">
-        <div className="space-y-2">
-          <h4 className="font-medium leading-none">Spread settings</h4>
-          <p className="text-sm text-muted-foreground">
-            Adjust the bid/ask spread for the selected trading pair.
-          </p>
+      <PopoverContent>
+        <div className="grid gap-2">
+          <Label htmlFor="width">Width</Label>
+          <Input id="width" defaultValue="100%" />
         </div>
       </PopoverContent>
     </Popover>

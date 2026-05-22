@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { OrderBook } from '@/components/trading/order-book'
 import { Portfolio } from '@/components/trading/portfolio'
 import { Header } from '@/components/site/header'
+import { TradingShowcase } from '@/components/site/trading-showcase'
 
 const sampleBids = [
   { price: 64012.5, amount: 0.842 },
@@ -22,11 +23,27 @@ const sampleAsks = [
   { price: 64018.5, amount: 1.762 },
   { price: 64020.0, amount: 0.298 },
 ]
-const sampleAssets = [
-  { name: 'BTC', value: 14820.5, change: 4.2 },
-  { name: 'ETH', value: 6240.0, change: -1.8 },
-  { name: 'SOL', value: 2105.75, change: 9.6 },
-  { name: 'USDT', value: 1334.25, change: 0.0 },
+const sampleCategories = [
+  {
+    id: 'currency',
+    name: 'Currency and Metals',
+    total: '1 110,73 ₽',
+    share: '0,01%',
+    items: [
+      { symbol: 'RUB', name: 'Russian Ruble', quantity: '1 026,85', price: '', avg: '', value: '1 026,85 ₽', share: '0,01%', profit: '', profitPercent: '' },
+      { symbol: 'EUR', name: 'Euro', quantity: '0,72', price: '93,6650 ₽', avg: '79,0475 ₽', value: '67,44 ₽', share: '≈0,00%', profit: '10,52 ₽', profitPercent: '18,49%' },
+      { symbol: 'USD', name: 'US Dollar', quantity: '0,19', price: '86,5675 ₽', avg: '91,8200 ₽', value: '16,45 ₽', share: '≈0,00%', profit: '-1,00 ₽', profitPercent: '-5,72%' },
+    ],
+  },
+  {
+    id: 'funds',
+    name: 'Funds',
+    total: '13 404 600,00 ₽',
+    share: '99,99%',
+    items: [
+      { symbol: 'LQDT', name: 'LQDT', quantity: '8 250 000', price: '1,6248 ₽', avg: '1,3589 ₽', value: '13 404 600,00 ₽', share: '99,99%', profit: '2 193 526,50 ₽', profitPercent: '19,57%' },
+    ],
+  },
 ]
 
 function SectionHeader({ badge, title, subtitle }: { badge: string; title: string; subtitle: string }) {
@@ -104,12 +121,15 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto items-stretch">
             <div className="rounded-3xl border border-border bg-card/40 p-4 backdrop-blur-xl">
               <p className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-3 px-2">Order Book · BTC/USDT</p>
-              <OrderBook bids={sampleBids} asks={sampleAsks} priceDecimals={1} amountDecimals={3} />
+              <div className="h-[420px]">
+                <OrderBook bids={sampleBids} asks={sampleAsks} priceDecimals={1} amountDecimals={3} />
+              </div>
             </div>
             <div className="rounded-3xl border border-border bg-card/40 p-6 backdrop-blur-xl">
-              <Portfolio assets={sampleAssets} currency="USD" title="Portfolio" subtitle="Across all exchanges" />
+              <Portfolio categories={sampleCategories} title="Balance" subtitle="Trading Portfolio" />
             </div>
           </div>
+          <TradingShowcase />
           <div className="text-center mt-10">
             <Button asChild variant="outline">
               <Link href="/docs/components/order-book">Explore Trading Components →</Link>

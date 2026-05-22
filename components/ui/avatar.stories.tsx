@@ -5,13 +5,11 @@ const meta: Meta<typeof Avatar> = {
   title: 'UI/Avatar',
   component: Avatar,
   parameters: { layout: 'centered' },
-  tags: ['autodocs'],
 }
-
 export default meta
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<typeof Avatar>
 
-export const Default: Story = {
+export const WithImage: Story = {
   render: () => (
     <Avatar>
       <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
@@ -23,23 +21,8 @@ export const Default: Story = {
 export const Fallback: Story = {
   render: () => (
     <Avatar>
-      <AvatarFallback className="text-foreground">MM</AvatarFallback>
+      <AvatarImage src="" alt="broken" />
+      <AvatarFallback>JD</AvatarFallback>
     </Avatar>
-  ),
-}
-
-export const Group: Story = {
-  render: () => (
-    <div className="flex -space-x-3">
-      <Avatar className="ring-2 ring-background">
-        <AvatarFallback className="text-foreground">AB</AvatarFallback>
-      </Avatar>
-      <Avatar className="ring-2 ring-background">
-        <AvatarFallback className="text-foreground">CD</AvatarFallback>
-      </Avatar>
-      <Avatar className="ring-2 ring-background">
-        <AvatarFallback className="text-foreground">EF</AvatarFallback>
-      </Avatar>
-    </div>
   ),
 }

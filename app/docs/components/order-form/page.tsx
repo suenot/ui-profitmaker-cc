@@ -10,44 +10,51 @@ const previewCode = `import { OrderForm } from '@/components/trading/order-form'
 
 export default function Example() {
   return (
-    <OrderForm
-      symbol="BTC/USDT"
-      onSubmit={(values) => console.log(values)}
-    />
+    <div className="w-80 rounded-md border border-border bg-card p-4">
+      <OrderForm
+        symbol="BTC/USDT"
+        exchange="binance"
+        market="spot"
+        stepSize={0.0001}
+        onSubmit={(values) => console.log(values)}
+      />
+    </div>
   )
 }`
 
 const sourceCode = `'use client'
 
 import * as React from 'react'
+import { ChevronDown, AlertCircle, CheckCircle, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+export type OrderType = 'market' | 'limit' | 'stop_loss'
 export type OrderSide = 'buy' | 'sell'
-export type OrderType = 'limit' | 'market'
 
 export interface OrderFormValues {
-  side: OrderSide
   type: OrderType
+  side: OrderSide
   price: number
   amount: number
+  stopPrice: number
+  stopLoss?: number
+  takeProfit?: number
 }
 
 export interface OrderFormProps {
   symbol: string
-  side?: OrderSide
-  onSideChange?: (side: OrderSide) => void
-  orderType?: OrderType
-  onOrderTypeChange?: (type: OrderType) => void
-  price?: number
-  onPriceChange?: (price: number) => void
-  amount?: number
-  onAmountChange?: (amount: number) => void
+  exchange?: string
+  market?: string
+  stepSize?: number
+  available?: number
+  maxAmount?: number
   onSubmit?: (values: OrderFormValues) => void
   className?: string
 }
 
-// Works controlled (pass value + onChange) or uncontrolled (internal state).
-// Buy/sell tabs, limit/market toggle, computed total, and local validation.`
+// Market/Limit/Stop tabs, price + quantity (with steppers) fields, advanced
+// stop-loss/take-profit options, estimated cost & commission, and Buy/Sell
+// buttons. State is local; emits onSubmit on a valid Buy/Sell click.`
 
 export default function OrderFormPage() {
   return (
@@ -55,13 +62,15 @@ export default function OrderFormPage() {
       <Badge className="mb-4">Trading</Badge>
       <h1 className="text-4xl font-black tracking-tight mb-4">Order Form</h1>
       <p className="text-lg text-muted-foreground font-light leading-relaxed mb-8">
-        Buy/sell order entry with limit/market toggle, price and amount fields, and a computed total. Works controlled or
-        uncontrolled and emits an <code className="bg-muted px-1.5 py-0.5 rounded font-mono text-sm">onSubmit</code> callback.
+        Order entry with Market/Limit/Stop tabs, price and quantity fields with steppers, advanced stop-loss/take-profit options,
+        estimated cost and commission, and Buy/Sell buttons. Emits an <code className="bg-muted px-1.5 py-0.5 rounded font-mono text-sm">onSubmit</code> callback on a valid order.
       </p>
 
       <h2 className="text-xl font-black tracking-tight mb-4 mt-10">Preview</h2>
-      <ComponentPreview code={previewCode} storyId="trading-orderform--uncontrolled">
-        <OrderForm symbol="BTC/USDT" onSubmit={(values) => console.log(values)} />
+      <ComponentPreview code={previewCode} storyId="trading-orderform--default">
+        <div className="w-80 rounded-md border border-border bg-card p-4">
+          <OrderForm symbol="BTC/USDT" exchange="binance" market="spot" stepSize={0.0001} onSubmit={(values) => console.log(values)} />
+        </div>
       </ComponentPreview>
 
       <h2 className="text-xl font-black tracking-tight mb-4 mt-10">Source</h2>
@@ -71,15 +80,12 @@ export default function OrderFormPage() {
       <h2 className="text-xl font-black tracking-tight mb-4 mt-10">Props</h2>
       <PropsTable props={[
         { name: 'symbol', type: 'string', description: 'Trading pair, e.g. "BTC/USDT"', required: true },
-        { name: 'side', type: "'buy' | 'sell'", description: 'Controlled side; omit for internal state' },
-        { name: 'onSideChange', type: '(side) => void', description: 'Called when the side tab changes' },
-        { name: 'orderType', type: "'limit' | 'market'", description: 'Controlled order type' },
-        { name: 'onOrderTypeChange', type: '(type) => void', description: 'Called when the order type changes' },
-        { name: 'price', type: 'number', description: 'Controlled price value' },
-        { name: 'onPriceChange', type: '(price) => void', description: 'Called when the price input changes' },
-        { name: 'amount', type: 'number', description: 'Controlled amount value' },
-        { name: 'onAmountChange', type: '(amount) => void', description: 'Called when the amount input changes' },
-        { name: 'onSubmit', type: '(values: OrderFormValues) => void', description: 'Called on valid submit' },
+        { name: 'exchange', type: 'string', defaultValue: "'binance'", description: 'Exchange name shown in the instrument header' },
+        { name: 'market', type: 'string', defaultValue: "'spot'", description: 'Market type shown in the instrument header' },
+        { name: 'stepSize', type: 'number', defaultValue: '0.00000001', description: 'Quantity increment used by the – / + steppers' },
+        { name: 'available', type: 'number', description: 'Available balance; renders the Available/Max grid when set' },
+        { name: 'maxAmount', type: 'number', description: 'Max order amount; renders the Available/Max grid when set' },
+        { name: 'onSubmit', type: '(values: OrderFormValues) => void', description: 'Called on a valid Buy/Sell click' },
         { name: 'className', type: 'string', description: 'Additional CSS classes' },
       ]} />
     </div>

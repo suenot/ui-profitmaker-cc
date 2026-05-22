@@ -5,11 +5,16 @@ const meta: Meta<typeof OrderBook> = {
   title: 'Trading/OrderBook',
   component: OrderBook,
   parameters: { layout: 'centered' },
-  tags: ['autodocs'],
+  decorators: [
+    (Story) => (
+      <div className="h-[400px] w-72 rounded-md border border-border bg-card">
+        <Story />
+      </div>
+    ),
+  ],
 }
-
 export default meta
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<typeof OrderBook>
 
 const bids = [
   { price: 67234.5, amount: 0.452 },
@@ -29,4 +34,8 @@ const asks = [
 
 export const Default: Story = {
   args: { bids, asks, priceDecimals: 1, amountDecimals: 3 },
+}
+
+export const Cumulative: Story = {
+  args: { bids, asks, priceDecimals: 1, amountDecimals: 3, showCumulative: true },
 }

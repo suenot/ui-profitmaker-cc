@@ -26,44 +26,49 @@ const previewCode = `import { OrderBook } from '@/components/trading/order-book'
 
 export default function Example() {
   return (
-    <OrderBook
-      priceDecimals={1}
-      amountDecimals={3}
-      bids={[
-        { price: 67234.5, amount: 0.452 },
-        { price: 67233.0, amount: 1.21 },
-        { price: 67231.8, amount: 0.087 },
-      ]}
-      asks={[
-        { price: 67236.1, amount: 0.331 },
-        { price: 67237.4, amount: 0.95 },
-        { price: 67239.0, amount: 1.78 },
-      ]}
-    />
+    <div className="h-[400px] w-72 rounded-md border border-border bg-card">
+      <OrderBook
+        priceDecimals={1}
+        amountDecimals={3}
+        bids={[
+          { price: 67234.5, amount: 0.452 },
+          { price: 67233.0, amount: 1.21 },
+          { price: 67231.8, amount: 0.087 },
+        ]}
+        asks={[
+          { price: 67236.1, amount: 0.331 },
+          { price: 67237.4, amount: 0.95 },
+          { price: 67239.0, amount: 1.78 },
+        ]}
+      />
+    </div>
   )
 }`
 
 const sourceCode = `'use client'
 
 import * as React from 'react'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import { cn } from '@/lib/utils'
 
 export interface OrderBookLevel {
   price: number
   amount: number
-  total?: number
 }
 
 export interface OrderBookProps {
   bids: OrderBookLevel[]
   asks: OrderBookLevel[]
+  displayDepth?: number
+  showCumulative?: boolean
   priceDecimals?: number
   amountDecimals?: number
   className?: string
 }
 
-// Presentational depth view: asks on top, bids on bottom, spread row between.
-// Depth bars are scaled to the largest total across both sides.`
+// Virtualized depth ladder: asks (red) on top, spread row, bids (green) on
+// bottom. Uses @tanstack/react-virtual for both sides. Fills its parent's
+// height — wrap it in a sized container.`
 
 export default function OrderBookPage() {
   return (
@@ -71,13 +76,15 @@ export default function OrderBookPage() {
       <Badge className="mb-4">Trading</Badge>
       <h1 className="text-4xl font-black tracking-tight mb-4">Order Book</h1>
       <p className="text-lg text-muted-foreground font-light leading-relaxed mb-8">
-        Classic bid/ask depth ladder with red/green rows, depth bars, and a spread row. Presentational only — feed it
+        Virtualized bid/ask depth ladder with red asks on top, a spread row, and green bids on bottom. Presentational only — feed it
         <code className="bg-muted px-1.5 py-0.5 rounded font-mono text-sm">bids</code> and <code className="bg-muted px-1.5 py-0.5 rounded font-mono text-sm">asks</code> arrays.
       </p>
 
       <h2 className="text-xl font-black tracking-tight mb-4 mt-10">Preview</h2>
       <ComponentPreview code={previewCode} storyId="trading-orderbook--default">
-        <OrderBook bids={bids} asks={asks} priceDecimals={1} amountDecimals={3} />
+        <div className="h-[400px] w-72 rounded-md border border-border bg-card">
+          <OrderBook bids={bids} asks={asks} priceDecimals={1} amountDecimals={3} />
+        </div>
       </ComponentPreview>
 
       <h2 className="text-xl font-black tracking-tight mb-4 mt-10">Source</h2>
@@ -86,10 +93,12 @@ export default function OrderBookPage() {
 
       <h2 className="text-xl font-black tracking-tight mb-4 mt-10">Props</h2>
       <PropsTable props={[
-        { name: 'bids', type: 'OrderBookLevel[]', description: 'Buy levels: { price, amount, total? } (highest first)', required: true },
-        { name: 'asks', type: 'OrderBookLevel[]', description: 'Sell levels: { price, amount, total? } (lowest first)', required: true },
+        { name: 'bids', type: 'OrderBookLevel[]', description: 'Buy levels: { price, amount } (highest first)', required: true },
+        { name: 'asks', type: 'OrderBookLevel[]', description: 'Sell levels: { price, amount } (lowest first)', required: true },
+        { name: 'displayDepth', type: 'number', defaultValue: '50', description: 'Max number of levels rendered per side' },
+        { name: 'showCumulative', type: 'boolean', defaultValue: 'false', description: 'Show cumulative amount instead of total in the last column' },
         { name: 'priceDecimals', type: 'number', defaultValue: '2', description: 'Decimals for price formatting' },
-        { name: 'amountDecimals', type: 'number', defaultValue: '4', description: 'Decimals for amount/total formatting' },
+        { name: 'amountDecimals', type: 'number', defaultValue: '4', description: 'Decimals for amount formatting' },
         { name: 'className', type: 'string', description: 'Additional CSS classes' },
       ]} />
     </div>

@@ -1,91 +1,196 @@
 'use client'
 
 import * as React from 'react'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import { cn } from '@/lib/utils'
 
 export interface OrderBookLevel {
   price: number
   amount: number
-  total?: number
 }
 
 export interface OrderBookProps {
   bids: OrderBookLevel[]
   asks: OrderBookLevel[]
+  displayDepth?: number
+  showCumulative?: boolean
   priceDecimals?: number
   amountDecimals?: number
   className?: string
 }
 
-function withTotals(levels: OrderBookLevel[]): Required<OrderBookLevel>[] {
-  return levels.map((l) => ({ ...l, total: l.total ?? l.price * l.amount }))
+interface ProcessedLevel {
+  price: number
+  amount: number
+  total: number
+  cumulative: number
 }
 
 export function OrderBook({
   bids,
   asks,
+  displayDepth = 50,
+  showCumulative = false,
   priceDecimals = 2,
   amountDecimals = 4,
   className,
 }: OrderBookProps) {
-  const bidLevels = withTotals(bids)
-  const askLevels = withTotals(asks)
+  const formatPrice = (price: number): string => price.toFixed(priceDecimals)
+  const formatAmount = (amount: number): string => amount.toFixed(amountDecimals)
+  const formatVolume = (volume: number): string => {
+    if (volume >= 1000000) return (volume / 1000000).toFixed(2) + 'M'
+    if (volume >= 1000) return (volume / 1000).toFixed(2) + 'K'
+    return volume.toFixed(2)
+  }
 
-  const maxTotal = Math.max(
-    ...bidLevels.map((l) => l.total),
-    ...askLevels.map((l) => l.total),
-    1
-  )
+  const processedOrderBook = React.useMemo(() => {
+    const process = (levels: OrderBookLevel[]): ProcessedLevel[] => {
+      let cumulative = 0
+      return levels.slice(0, displayDepth).map((level) => {
+        cumulative += level.amount
+        return {
+          price: level.price,
+          amount: level.amount,
+          total: level.price * level.amount,
+          cumulative,
+        }
+      })
+    }
 
-  const bestBid = bidLevels[0]?.price ?? 0
-  const bestAsk = askLevels[0]?.price ?? 0
-  const spread = bestAsk && bestBid ? bestAsk - bestBid : 0
-  const spreadPercent = bestBid ? (spread / bestBid) * 100 : 0
+    const processedBids = process(bids)
+    const processedAsks = process(asks)
 
-  const fmtPrice = (n: number) => n.toFixed(priceDecimals)
-  const fmtAmount = (n: number) => n.toFixed(amountDecimals)
+    return {
+      bids: processedBids,
+      asks: processedAsks,
+      spread:
+        processedAsks.length > 0 && processedBids.length > 0
+          ? processedAsks[0].price - processedBids[0].price
+          : 0,
+      spreadPercent:
+        processedAsks.length > 0 && processedBids.length > 0
+          ? ((processedAsks[0].price - processedBids[0].price) / processedBids[0].price) * 100
+          : 0,
+    }
+  }, [bids, asks, displayDepth])
 
-  const Row = ({ level, side }: { level: Required<OrderBookLevel>; side: 'bid' | 'ask' }) => {
-    const depth = (level.total / maxTotal) * 100
+  // Virtualized Asks Component (sells - top)
+  const VirtualizedAsks = ({ asks }: { asks: ProcessedLevel[] }) => {
+    const asksParentRef = React.useRef<HTMLDivElement>(null)
+
+    const asksVirtualizer = useVirtualizer({
+      count: asks.length,
+      getScrollElement: () => asksParentRef.current,
+      estimateSize: () => 24,
+      measureElement: undefined,
+    })
+
     return (
-      <div className="relative grid grid-cols-3 px-3 py-1 font-mono text-xs">
+      <div ref={asksParentRef} className="flex-1 overflow-auto">
         <div
-          className={cn('absolute inset-y-0 right-0', side === 'bid' ? 'bg-green-500/10' : 'bg-red-500/10')}
-          style={{ width: `${depth}%` }}
-        />
-        <span className={cn('relative z-10', side === 'bid' ? 'text-green-400' : 'text-red-400')}>
-          {fmtPrice(level.price)}
-        </span>
-        <span className="relative z-10 text-right text-foreground">{fmtAmount(level.amount)}</span>
-        <span className="relative z-10 text-right text-muted-foreground">{fmtAmount(level.total)}</span>
+          style={{
+            height: asksVirtualizer.getTotalSize(),
+            width: '100%',
+            position: 'relative',
+          }}
+        >
+          {asksVirtualizer.getVirtualItems().map((virtualRow) => {
+            const ask = asks[asks.length - 1 - virtualRow.index]
+            return (
+              <div
+                key={virtualRow.key}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '24px',
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
+                className="grid grid-cols-3 gap-2 text-xs px-2 py-1 bg-red-50/20 hover:bg-red-50/30 dark:bg-red-900/20 dark:hover:bg-red-900/30 border-l-2 border-red-500 dark:border-red-400"
+              >
+                <div className="font-mono text-red-600 dark:text-red-400 leading-none">{formatPrice(ask.price)}</div>
+                <div className="font-mono text-right text-foreground leading-none">{formatAmount(ask.amount)}</div>
+                <div className="font-mono text-right text-muted-foreground leading-none">
+                  {showCumulative ? formatAmount(ask.cumulative) : formatVolume(ask.total)}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
+
+  // Virtualized Bids Component (buys - bottom)
+  const VirtualizedBids = ({ bids }: { bids: ProcessedLevel[] }) => {
+    const bidsParentRef = React.useRef<HTMLDivElement>(null)
+
+    const bidsVirtualizer = useVirtualizer({
+      count: bids.length,
+      getScrollElement: () => bidsParentRef.current,
+      estimateSize: () => 24,
+      measureElement: undefined,
+    })
+
+    return (
+      <div ref={bidsParentRef} className="flex-1 overflow-auto">
+        <div
+          style={{
+            height: bidsVirtualizer.getTotalSize(),
+            width: '100%',
+            position: 'relative',
+          }}
+        >
+          {bidsVirtualizer.getVirtualItems().map((virtualRow) => {
+            const bid = bids[virtualRow.index]
+            return (
+              <div
+                key={virtualRow.key}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '24px',
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
+                className="grid grid-cols-3 gap-2 text-xs px-2 py-1 bg-green-50/20 hover:bg-green-50/30 dark:bg-green-900/20 dark:hover:bg-green-900/30 border-l-2 border-green-500 dark:border-green-400"
+              >
+                <div className="font-mono text-green-600 dark:text-green-400 leading-none">{formatPrice(bid.price)}</div>
+                <div className="font-mono text-right text-foreground leading-none">{formatAmount(bid.amount)}</div>
+                <div className="font-mono text-right text-muted-foreground leading-none">
+                  {showCumulative ? formatAmount(bid.cumulative) : formatVolume(bid.total)}
+                </div>
+              </div>
+            )
+          })}
+        </div>
       </div>
     )
   }
 
   return (
-    <div className={cn('flex w-full max-w-xs flex-col rounded-2xl border border-border bg-card/40 text-foreground', className)}>
-      <div className="grid grid-cols-3 border-b border-border px-3 py-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-        <span>Price</span>
-        <span className="text-right">Amount</span>
-        <span className="text-right">Total</span>
-      </div>
+    <div className={cn('w-full h-full flex flex-col', className)}>
+      <div className="flex-1 flex flex-col space-y-1">
+        {/* Headers */}
+        <div className="grid grid-cols-3 gap-2 text-xs font-medium text-muted-foreground px-2 py-1 border-b border-border">
+          <div>Price</div>
+          <div className="text-right">Volume</div>
+          <div className="text-right">{showCumulative ? 'Cumul.' : 'Total'}</div>
+        </div>
 
-      <div className="flex flex-col-reverse">
-        {askLevels.map((level, i) => (
-          <Row key={`ask-${i}`} level={level} side="ask" />
-        ))}
-      </div>
+        {/* Asks (sells) - top - Virtualized */}
+        <VirtualizedAsks asks={processedOrderBook.asks} />
 
-      <div className="flex items-center justify-between border-y border-border bg-muted/30 px-3 py-2 text-xs">
-        <span className="font-mono font-bold">{fmtPrice(spread)}</span>
-        <span className="text-muted-foreground">Spread</span>
-        <span className="font-mono text-muted-foreground">{spreadPercent.toFixed(3)}%</span>
-      </div>
+        {/* Spread */}
+        <div className="bg-muted p-2 text-center border-y border-border flex-shrink-0">
+          <div className="text-xs text-foreground">Spread: {formatPrice(processedOrderBook.spread)}</div>
+          <div className="text-xs text-muted-foreground">({processedOrderBook.spreadPercent.toFixed(4)}%)</div>
+        </div>
 
-      <div className="flex flex-col">
-        {bidLevels.map((level, i) => (
-          <Row key={`bid-${i}`} level={level} side="bid" />
-        ))}
+        {/* Bids (buys) - bottom - Virtualized */}
+        <VirtualizedBids bids={processedOrderBook.bids} />
       </div>
     </div>
   )

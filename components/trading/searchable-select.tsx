@@ -15,11 +15,10 @@ export interface SearchableSelectProps {
   loading?: boolean
   className?: string
   disabled?: boolean
-  /** Human-readable labels keyed by option value */
   optionLabels?: Record<string, string>
 }
 
-export const SearchableSelect: React.FC<SearchableSelectProps> = ({
+export function SearchableSelect({
   value,
   onValueChange,
   options,
@@ -29,7 +28,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
   className,
   disabled = false,
   optionLabels = {},
-}) => {
+}: SearchableSelectProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const containerRef = useRef<HTMLDivElement>(null)
@@ -41,7 +40,10 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
     const query = searchQuery.toLowerCase()
     return options.filter((option) => {
       const label = optionLabels[option] || option
-      return option.toLowerCase().includes(query) || label.toLowerCase().includes(query)
+      return (
+        option.toLowerCase().includes(query) ||
+        label.toLowerCase().includes(query)
+      )
     })
   }, [options, searchQuery, optionLabels])
 
@@ -81,8 +83,26 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
 
   const handleToggle = () => {
     if (disabled || loading) return
-    setIsOpen(!isOpen)
+    setIsOpen((prev) => !prev)
     if (!isOpen) setSearchQuery('')
+  }
+
+  const renderOption = (option: string) => {
+    const isSelected = option === value
+    return (
+      <button
+        key={option}
+        type="button"
+        onClick={() => handleSelect(option)}
+        className={cn(
+          'w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground',
+          'focus:bg-accent focus:text-accent-foreground focus:outline-none',
+          isSelected && 'bg-accent font-medium text-accent-foreground',
+        )}
+      >
+        {optionLabels[option] || option}
+      </button>
+    )
   }
 
   return (
@@ -92,10 +112,10 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
         onClick={handleToggle}
         disabled={disabled || loading}
         className={cn(
-          'flex h-9 w-full items-center justify-between rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground',
-          'placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring',
+          'flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background',
+          'placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
           'disabled:cursor-not-allowed disabled:opacity-50',
-          isOpen && 'ring-2 ring-ring'
+          isOpen && 'ring-2 ring-ring ring-offset-2',
         )}
       >
         <span className={cn('truncate', !value && 'text-muted-foreground')}>
@@ -103,12 +123,14 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
         </span>
         <div className="flex items-center gap-1">
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-          <ChevronDown className={cn('h-4 w-4 transition-transform', isOpen && 'rotate-180')} />
+          <ChevronDown
+            className={cn('h-4 w-4 transition-transform', isOpen && 'rotate-180')}
+          />
         </div>
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 z-50 mt-1 rounded-md border border-border bg-popover shadow-lg">
+        <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-md border border-border bg-popover shadow-lg">
           <div className="border-b border-border p-2">
             <div className="relative">
               <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -118,7 +140,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="w-full rounded border border-border bg-card py-1.5 pl-8 pr-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                className="w-full rounded border border-input bg-background py-1.5 pl-8 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
               />
             </div>
           </div>
@@ -136,10 +158,15 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
                 {searchQuery ? 'Nothing found' : 'No options available'}
               </div>
             ) : shouldUseVirtualization ? (
-              <div style={{ height: virtualizer.getTotalSize(), width: '100%', position: 'relative' }}>
+              <div
+                style={{
+                  height: virtualizer.getTotalSize(),
+                  width: '100%',
+                  position: 'relative',
+                }}
+              >
                 {virtualizer.getVirtualItems().map((virtualItem) => {
                   const option = filteredOptions[virtualItem.index]
-                  const isSelected = option === value
                   return (
                     <div
                       key={virtualItem.key}
@@ -152,39 +179,13 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
                         transform: `translateY(${virtualItem.start}px)`,
                       }}
                     >
-                      <button
-                        type="button"
-                        onClick={() => handleSelect(option)}
-                        className={cn(
-                          'w-full px-3 py-2 text-left text-sm text-foreground hover:bg-muted',
-                          'focus:bg-muted focus:outline-none',
-                          isSelected && 'bg-accent font-medium text-accent-foreground'
-                        )}
-                      >
-                        {optionLabels[option] || option}
-                      </button>
+                      {renderOption(option)}
                     </div>
                   )
                 })}
               </div>
             ) : (
-              filteredOptions.map((option) => {
-                const isSelected = option === value
-                return (
-                  <button
-                    key={option}
-                    type="button"
-                    onClick={() => handleSelect(option)}
-                    className={cn(
-                      'w-full px-3 py-2 text-left text-sm text-foreground hover:bg-muted',
-                      'focus:bg-muted focus:outline-none',
-                      isSelected && 'bg-accent font-medium text-accent-foreground'
-                    )}
-                  >
-                    {optionLabels[option] || option}
-                  </button>
-                )
-              })
+              filteredOptions.map(renderOption)
             )}
           </div>
 

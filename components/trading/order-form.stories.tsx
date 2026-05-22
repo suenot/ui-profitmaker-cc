@@ -1,43 +1,39 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { useState } from 'react'
-import { OrderForm, type OrderSide, type OrderType, type OrderFormValues } from './order-form'
+import { OrderForm } from './order-form'
 
 const meta: Meta<typeof OrderForm> = {
   title: 'Trading/OrderForm',
   component: OrderForm,
   parameters: { layout: 'centered' },
-  tags: ['autodocs'],
+  decorators: [
+    (Story) => (
+      <div className="w-80 rounded-md border border-border bg-card p-4">
+        <Story />
+      </div>
+    ),
+  ],
 }
-
 export default meta
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<typeof OrderForm>
 
-export const Uncontrolled: Story = {
+export const Default: Story = {
   args: {
     symbol: 'BTC/USDT',
-    onSubmit: (values: OrderFormValues) => console.log('submit', values),
+    exchange: 'binance',
+    market: 'spot',
+    stepSize: 0.0001,
+    onSubmit: (values) => console.log(values),
   },
 }
 
-export const Controlled: Story = {
-  render: () => {
-    const [side, setSide] = useState<OrderSide>('buy')
-    const [orderType, setOrderType] = useState<OrderType>('limit')
-    const [price, setPrice] = useState(67235)
-    const [amount, setAmount] = useState(0.5)
-    return (
-      <OrderForm
-        symbol="ETH/USDT"
-        side={side}
-        onSideChange={setSide}
-        orderType={orderType}
-        onOrderTypeChange={setOrderType}
-        price={price}
-        onPriceChange={setPrice}
-        amount={amount}
-        onAmountChange={setAmount}
-        onSubmit={(values) => console.log('submit', values)}
-      />
-    )
+export const WithBalance: Story = {
+  args: {
+    symbol: 'ETH/USDT',
+    exchange: 'binance',
+    market: 'futures',
+    stepSize: 0.001,
+    available: 1000,
+    maxAmount: 0.5,
+    onSubmit: (values) => console.log(values),
   },
 }

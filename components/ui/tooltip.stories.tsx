@@ -1,16 +1,19 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from './tooltip'
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from './tooltip'
 import { Button } from './button'
 
-const meta: Meta = {
+const meta: Meta<typeof Tooltip> = {
   title: 'UI/Tooltip',
   component: Tooltip,
   parameters: { layout: 'centered' },
-  tags: ['autodocs'],
 }
-
 export default meta
-type Story = StoryObj
+type Story = StoryObj<typeof Tooltip>
 
 export const Default: Story = {
   render: () => (
@@ -20,22 +23,7 @@ export const Default: Story = {
           <Button variant="outline">Hover me</Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Quotes refresh every 200ms</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  ),
-}
-
-export const Open: Story = {
-  render: () => (
-    <TooltipProvider>
-      <Tooltip open>
-        <TooltipTrigger asChild>
-          <Button variant="outline">Always visible</Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>This tooltip stays open</p>
+          <p>Add to library</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

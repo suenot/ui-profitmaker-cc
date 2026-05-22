@@ -1,27 +1,22 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { Terminal, AlertCircle } from 'lucide-react'
 import { Alert, AlertTitle, AlertDescription } from './alert'
-import { Terminal, AlertTriangle } from 'lucide-react'
 
 const meta: Meta<typeof Alert> = {
   title: 'UI/Alert',
   component: Alert,
   parameters: { layout: 'centered' },
-  tags: ['autodocs'],
-  argTypes: {
-    variant: { control: 'select', options: ['default', 'destructive'] },
-  },
 }
-
 export default meta
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<typeof Alert>
 
 export const Default: Story = {
   render: () => (
-    <Alert className="w-96 text-foreground">
+    <Alert className="w-96">
       <Terminal className="h-4 w-4" />
       <AlertTitle>Heads up!</AlertTitle>
-      <AlertDescription className="text-muted-foreground">
-        Your strategy has been deployed and is now quoting.
+      <AlertDescription>
+        You can add components to your app using the CLI.
       </AlertDescription>
     </Alert>
   ),
@@ -30,10 +25,10 @@ export const Default: Story = {
 export const Destructive: Story = {
   render: () => (
     <Alert variant="destructive" className="w-96">
-      <AlertTriangle className="h-4 w-4" />
-      <AlertTitle>Connection lost</AlertTitle>
+      <AlertCircle className="h-4 w-4" />
+      <AlertTitle>Error</AlertTitle>
       <AlertDescription>
-        Unable to reach the exchange. Quotes have been paused.
+        Your session has expired. Please log in again.
       </AlertDescription>
     </Alert>
   ),

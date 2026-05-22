@@ -11,14 +11,14 @@ const previewCode = `import { useState } from 'react'
 import { InstrumentSearch, type Instrument } from '@/components/trading/instrument-search'
 
 const instruments: Instrument[] = [
-  { symbol: 'BTC/USDT', name: 'Bitcoin', exchange: 'binance', type: 'spot' },
-  { symbol: 'ETH/USDT', name: 'Ethereum', exchange: 'binance', type: 'spot' },
-  { symbol: 'SOL/USDT', name: 'Solana', exchange: 'bybit', type: 'perp' },
+  { account: 'main@trade.io', exchange: 'binance', market: 'spot', pair: 'BTC/USDT' },
+  { account: 'main@trade.io', exchange: 'binance', market: 'spot', pair: 'ETH/USDT' },
+  { account: 'alt@trade.io', exchange: 'bybit', market: 'linear', pair: 'SOL/USDT' },
 ]
 
 export default function Example() {
   const [value, setValue] = useState<Instrument | null>(null)
-  return <InstrumentSearch value={value} onSelect={setValue} instruments={instruments} />
+  return <InstrumentSearch value={value} onChange={setValue} instruments={instruments} />
 }`
 
 const sourceCode = `'use client'
@@ -30,34 +30,36 @@ import { Search, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export interface Instrument {
-  symbol: string
-  name?: string
-  exchange?: string
-  type?: string
+  account: string
+  exchange: string
+  market: string
+  pair: string
 }
 
 export interface InstrumentSearchProps {
   value?: Instrument | null
-  onSelect: (instrument: Instrument | null) => void
+  onChange: (instrument: Instrument | null) => void
   instruments: Instrument[]
   placeholder?: string
   className?: string
 }
 
-// Virtualized instrument search with multi-word matching and keyboard navigation.
+// Virtualized instrument search with multi-word matching (each word must match
+// any of account/exchange/market/pair) and keyboard navigation. Shows each
+// instrument as labeled Account/Exchange/Market/Pair lines with a results footer.
 // See components/trading/instrument-search.tsx for the full implementation.`
 
 const sampleInstruments: Instrument[] = [
-  { symbol: 'BTC/USDT', name: 'Bitcoin', exchange: 'binance', type: 'spot' },
-  { symbol: 'ETH/USDT', name: 'Ethereum', exchange: 'binance', type: 'spot' },
-  { symbol: 'SOL/USDT', name: 'Solana', exchange: 'binance', type: 'spot' },
-  { symbol: 'BTC/USDT', name: 'Bitcoin', exchange: 'bybit', type: 'perp' },
-  { symbol: 'ETH/USDT', name: 'Ethereum', exchange: 'bybit', type: 'perp' },
-  { symbol: 'XRP/USDT', name: 'Ripple', exchange: 'okx', type: 'spot' },
-  { symbol: 'ADA/USDT', name: 'Cardano', exchange: 'okx', type: 'spot' },
-  { symbol: 'DOGE/USDT', name: 'Dogecoin', exchange: 'kraken', type: 'spot' },
-  { symbol: 'AVAX/USDT', name: 'Avalanche', exchange: 'coinbase', type: 'spot' },
-  { symbol: 'LINK/USDT', name: 'Chainlink', exchange: 'kucoin', type: 'spot' },
+  { account: 'main@trade.io', exchange: 'binance', market: 'spot', pair: 'BTC/USDT' },
+  { account: 'main@trade.io', exchange: 'binance', market: 'spot', pair: 'ETH/USDT' },
+  { account: 'main@trade.io', exchange: 'binance', market: 'spot', pair: 'SOL/USDT' },
+  { account: 'alt@trade.io', exchange: 'bybit', market: 'linear', pair: 'BTC/USDT' },
+  { account: 'alt@trade.io', exchange: 'bybit', market: 'linear', pair: 'ETH/USDT' },
+  { account: 'alt@trade.io', exchange: 'okx', market: 'spot', pair: 'XRP/USDT' },
+  { account: 'alt@trade.io', exchange: 'okx', market: 'spot', pair: 'ADA/USDT' },
+  { account: 'fund@trade.io', exchange: 'kraken', market: 'spot', pair: 'DOGE/USDT' },
+  { account: 'fund@trade.io', exchange: 'coinbase', market: 'spot', pair: 'AVAX/USDT' },
+  { account: 'fund@trade.io', exchange: 'kucoin', market: 'spot', pair: 'LINK/USDT' },
 ]
 
 export default function InstrumentSearchPage() {
@@ -68,14 +70,14 @@ export default function InstrumentSearchPage() {
       <Badge className="mb-4">Trading</Badge>
       <h1 className="text-4xl font-black tracking-tight mb-4">Instrument Search</h1>
       <p className="text-lg text-muted-foreground font-light leading-relaxed mb-8">
-        Virtualized search box for picking a trading instrument across exchanges. Supports multi-word
-        matching against symbol, name, exchange, and type, plus full keyboard navigation.
+        Virtualized search box for picking an account instrument across exchanges. Supports multi-word
+        matching against account, exchange, market, and pair, plus full keyboard navigation.
       </p>
 
       <h2 className="text-xl font-black tracking-tight mb-4 mt-10">Preview</h2>
       <ComponentPreview code={previewCode} storyId="trading-instrumentsearch--default">
         <div className="w-96">
-          <InstrumentSearch value={value} onSelect={setValue} instruments={sampleInstruments} />
+          <InstrumentSearch value={value} onChange={setValue} instruments={sampleInstruments} />
         </div>
       </ComponentPreview>
 
@@ -85,10 +87,10 @@ export default function InstrumentSearchPage() {
 
       <h2 className="text-xl font-black tracking-tight mb-4 mt-10">Props</h2>
       <PropsTable props={[
-        { name: 'instruments', type: 'Instrument[]', description: 'List of instruments to search through', required: true },
-        { name: 'onSelect', type: '(instrument: Instrument | null) => void', description: 'Called when an instrument is selected or cleared', required: true },
+        { name: 'instruments', type: 'Instrument[]', description: 'Instruments to search: { account, exchange, market, pair }', required: true },
+        { name: 'onChange', type: '(instrument: Instrument | null) => void', description: 'Called when an instrument is selected or cleared', required: true },
         { name: 'value', type: 'Instrument | null', description: 'Currently selected instrument' },
-        { name: 'placeholder', type: 'string', defaultValue: "'Search symbol | name | exchange...'", description: 'Input placeholder' },
+        { name: 'placeholder', type: 'string', defaultValue: "'Search account | exchange | market | pair...'", description: 'Input placeholder' },
         { name: 'className', type: 'string', description: 'Additional CSS classes' },
       ]} />
     </div>

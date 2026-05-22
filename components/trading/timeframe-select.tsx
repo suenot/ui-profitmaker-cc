@@ -5,48 +5,66 @@ import { useMemo } from 'react'
 import { Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export type TimeframeOption = string | { value: string; label: string }
+export const TIMEFRAME_LABELS: Record<string, string> = {
+  '1m': '1m',
+  '3m': '3m',
+  '5m': '5m',
+  '15m': '15m',
+  '30m': '30m',
+  '1h': '1h',
+  '2h': '2h',
+  '4h': '4h',
+  '6h': '6h',
+  '12h': '12h',
+  '1d': '1d',
+  '1w': '1w',
+  '1M': '1M',
+}
 
 export interface TimeframeSelectProps {
   value: string
   onChange: (timeframe: string) => void
-  /** List of available timeframes, either plain strings or {value,label} objects */
-  timeframes?: TimeframeOption[]
+  availableTimeframes?: string[]
+  floating?: boolean
   className?: string
 }
 
-const DEFAULT_TIMEFRAMES: string[] = ['1m', '5m', '15m', '1h', '4h', '1d', '1w']
-
-export const TimeframeSelect: React.FC<TimeframeSelectProps> = ({
+export function TimeframeSelect({
   value,
   onChange,
-  timeframes = DEFAULT_TIMEFRAMES,
+  availableTimeframes,
+  floating = false,
   className,
-}) => {
-  const options = useMemo(
-    () =>
-      timeframes.map((tf) =>
-        typeof tf === 'string' ? { value: tf, label: tf } : tf
-      ),
-    [timeframes]
-  )
+}: TimeframeSelectProps) {
+  const options = useMemo(() => {
+    const timeframes = availableTimeframes ?? Object.keys(TIMEFRAME_LABELS)
+    return timeframes.map((tf) => ({
+      id: tf,
+      label: TIMEFRAME_LABELS[tf] || tf.toUpperCase(),
+    }))
+  }, [availableTimeframes])
 
   return (
     <div
       className={cn(
-        'inline-flex items-center gap-1 rounded-lg border border-border bg-card/90 p-1 shadow-lg backdrop-blur-sm',
-        className
+        'flex items-center gap-1 rounded-lg border border-border bg-background/90 p-1 shadow-lg backdrop-blur-sm',
+        floating && 'absolute bottom-4 right-4 z-10',
+        className,
       )}
     >
-      <Clock className="ml-1 h-3 w-3 pointer-events-none text-muted-foreground" />
+      <Clock className="pointer-events-none ml-1 h-3 w-3 text-muted-foreground" />
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="min-w-[2.5rem] cursor-pointer appearance-none border-none bg-transparent py-1 pl-1 pr-1 text-sm text-foreground outline-none"
-        style={{ background: 'transparent', WebkitAppearance: 'none', MozAppearance: 'none' }}
+        className="min-w-[2.5rem] cursor-pointer appearance-none border-none bg-transparent px-1 py-1 text-sm text-foreground outline-none"
+        style={{
+          background: 'transparent',
+          WebkitAppearance: 'none',
+          MozAppearance: 'none',
+        }}
       >
         {options.map((tf) => (
-          <option key={tf.value} value={tf.value} className="bg-card text-foreground">
+          <option key={tf.id} value={tf.id} className="bg-background text-foreground">
             {tf.label}
           </option>
         ))}

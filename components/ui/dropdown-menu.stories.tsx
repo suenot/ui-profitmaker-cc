@@ -10,15 +10,13 @@ import {
 } from './dropdown-menu'
 import { Button } from './button'
 
-const meta: Meta = {
+const meta: Meta<typeof DropdownMenu> = {
   title: 'UI/DropdownMenu',
   component: DropdownMenu,
   parameters: { layout: 'centered' },
-  tags: ['autodocs'],
 }
-
 export default meta
-type Story = StoryObj
+type Story = StoryObj<typeof DropdownMenu>
 
 export const Default: Story = {
   render: () => (
@@ -38,10 +36,7 @@ export const Default: Story = {
           <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          Log out
-          <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
-        </DropdownMenuItem>
+        <DropdownMenuItem>Log out</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   ),

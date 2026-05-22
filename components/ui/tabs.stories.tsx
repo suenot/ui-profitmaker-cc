@@ -1,32 +1,26 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './tabs'
 
-const meta: Meta = {
+const meta: Meta<typeof Tabs> = {
   title: 'UI/Tabs',
   component: Tabs,
   parameters: { layout: 'centered' },
-  tags: ['autodocs'],
 }
-
 export default meta
-type Story = StoryObj
+type Story = StoryObj<typeof Tabs>
 
 export const Default: Story = {
   render: () => (
-    <Tabs defaultValue="overview" className="w-96 text-foreground">
-      <TabsList>
-        <TabsTrigger value="overview">Overview</TabsTrigger>
-        <TabsTrigger value="orders">Orders</TabsTrigger>
-        <TabsTrigger value="logs">Logs</TabsTrigger>
+    <Tabs defaultValue="account" className="w-80">
+      <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger value="account">Account</TabsTrigger>
+        <TabsTrigger value="password">Password</TabsTrigger>
       </TabsList>
-      <TabsContent value="overview" className="text-muted-foreground text-sm">
-        Live PnL, inventory, and quoting status at a glance.
+      <TabsContent value="account">
+        Make changes to your account here.
       </TabsContent>
-      <TabsContent value="orders" className="text-muted-foreground text-sm">
-        Open and filled orders across all connected exchanges.
-      </TabsContent>
-      <TabsContent value="logs" className="text-muted-foreground text-sm">
-        Real-time engine logs and event stream.
+      <TabsContent value="password">
+        Change your password here.
       </TabsContent>
     </Tabs>
   ),
