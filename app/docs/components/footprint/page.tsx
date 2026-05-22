@@ -84,6 +84,7 @@ export interface FootprintCandle {
 
 export interface FootprintProps {
   candles: FootprintCandle[]
+  mode?: 'numbers' | 'profile'
   priceDecimals?: number
   imbalanceRatio?: number
   showPOC?: boolean
@@ -93,9 +94,10 @@ export interface FootprintProps {
   className?: string
 }
 
-// Canvas footprint chart: each candle is a column of price-level rows showing
-// bid volume (left) vs ask volume (right), intensity-shaded, with diagonal
-// imbalance outlines and an optional POC box per candle.`
+// Canvas footprint chart with two modes. 'numbers': each candle is a column of
+// price-level rows showing bid (left) vs ask (right) volume, intensity-shaded,
+// with diagonal imbalance outlines. 'profile': a divergent volume-profile per
+// candle (bid bars left, ask bars right). Both box the per-candle POC.`
 
 export default function FootprintPage() {
   return (
@@ -115,6 +117,16 @@ export default function FootprintPage() {
         </div>
       </ComponentPreview>
 
+      <h2 className="text-xl font-black tracking-tight mb-4 mt-10">Profile mode</h2>
+      <p className="text-muted-foreground font-light mb-4">
+        Set <code className="bg-muted px-1.5 py-0.5 rounded font-mono text-sm">mode=&quot;profile&quot;</code> for a divergent volume-profile per candle — bid bars left, ask bars right.
+      </p>
+      <ComponentPreview code={`<Footprint mode="profile" candles={candles} priceDecimals={0} tickSize={1} showPOC />`} language="tsx" storyId="trading-footprint--profile" previewClassName="min-h-[420px]">
+        <div className="w-[600px] h-[360px] rounded-md border border-border bg-card overflow-hidden">
+          <Footprint candles={candles} mode="profile" priceDecimals={0} tickSize={1} showPOC />
+        </div>
+      </ComponentPreview>
+
       <h2 className="text-xl font-black tracking-tight mb-4 mt-10">Source</h2>
       <p className="text-muted-foreground font-light mb-4">Copy this file to <code className="bg-muted px-1.5 py-0.5 rounded font-mono text-sm">components/trading/footprint.tsx</code></p>
       <CodeBlock code={sourceCode} language="tsx" />
@@ -122,6 +134,7 @@ export default function FootprintPage() {
       <h2 className="text-xl font-black tracking-tight mb-4 mt-10">Props</h2>
       <PropsTable props={[
         { name: 'candles', type: 'FootprintCandle[]', description: 'Candles, each with OHLC + per-price bid/ask volume levels', required: true },
+        { name: 'mode', type: "'numbers' | 'profile'", defaultValue: "'numbers'", description: 'Bid×ask volume cells, or a divergent volume-profile per candle' },
         { name: 'priceDecimals', type: 'number', defaultValue: '2', description: 'Decimals for price axis labels' },
         { name: 'imbalanceRatio', type: 'number', defaultValue: '3', description: 'Outline a cell when its volume >= ratio × the diagonal opposite volume' },
         { name: 'showPOC', type: 'boolean', defaultValue: 'true', description: 'Box the point-of-control (max-volume) level per candle' },

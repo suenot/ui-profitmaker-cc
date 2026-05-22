@@ -20,8 +20,10 @@ export interface FootprintCandle {
 
 export interface FootprintProps {
   candles: FootprintCandle[]
+  /** 'numbers' = bid×ask volume cells per level; 'profile' = divergent volume-profile bars per candle. */
+  mode?: 'numbers' | 'profile'
   priceDecimals?: number
-  /** Imbalance trigger: a side is flagged when its volume >= ratio × the diagonal opposite volume. */
+  /** Imbalance trigger: a side is flagged when its volume >= ratio × the diagonal opposite volume (numbers mode). */
   imbalanceRatio?: number
   showPOC?: boolean
   tickSize?: number
@@ -48,6 +50,7 @@ function cssVar(el: HTMLElement, name: string, fallback: string): string {
 
 export function Footprint({
   candles,
+  mode = 'numbers',
   priceDecimals = 2,
   imbalanceRatio = 3,
   showPOC = true,
@@ -145,61 +148,97 @@ export function Footprint({
       const byPrice = new Map<number, FootprintPriceLevel>()
       for (const l of candle.levels) byPrice.set(l.price, l)
 
-      for (const l of candle.levels) {
-        const y = rowYForPrice(l.price)
-        const diagBelow = byPrice.get(l.price - step)
-        const diagAbove = byPrice.get(l.price + step)
-        // Buy (ask) imbalance vs bid one level down; sell (bid) imbalance vs ask one level up.
-        const buyImb = diagBelow ? l.askVolume >= imbalanceRatio * Math.max(1e-9, diagBelow.bidVolume) : false
-        const sellImb = diagAbove ? l.bidVolume >= imbalanceRatio * Math.max(1e-9, diagAbove.askVolume) : false
+      if (mode === 'profile') {
+        // Divergent volume profile per candle (flowsurface-style): each price
+        // level is a horizontal bar — bid extends left (red), ask right (green),
+        // self-scaled to the candle's busiest level.
+        let maxSide = 0
+        for (const l of candle.levels) maxSide = Math.max(maxSide, l.bidVolume, l.askVolume)
+        maxSide = maxSide || 1
+        const center = x0 + cw / 2
+        const maxBar = cw / 2 - 2
 
-        // Bid cell (left)
-        ctx.fillStyle = `rgba(248,113,113,${intensity(l.bidVolume)})`
-        ctx.fillRect(bidX, y, half, rh - 1)
-        // Ask cell (right)
-        ctx.fillStyle = `rgba(74,222,128,${intensity(l.askVolume)})`
-        ctx.fillRect(askX, y, half, rh - 1)
+        for (const l of candle.levels) {
+          const y = rowYForPrice(l.price)
+          const bidLen = (l.bidVolume / maxSide) * maxBar
+          const askLen = (l.askVolume / maxSide) * maxBar
+          ctx.fillStyle = 'rgba(248,113,113,0.85)'
+          ctx.fillRect(center - bidLen, y + 1, bidLen, rh - 2)
+          ctx.fillStyle = 'rgba(74,222,128,0.85)'
+          ctx.fillRect(center, y + 1, askLen, rh - 2)
 
-        if (sellImb) {
-          ctx.strokeStyle = 'rgba(248,113,113,0.9)'
-          ctx.lineWidth = 1
-          ctx.strokeRect(bidX + 0.5, y + 0.5, half - 1, rh - 2)
-        }
-        if (buyImb) {
-          ctx.strokeStyle = 'rgba(74,222,128,0.9)'
-          ctx.lineWidth = 1
-          ctx.strokeRect(askX + 0.5, y + 0.5, half - 1, rh - 2)
-        }
-
-        if (rh >= 11) {
-          ctx.fillStyle = muted
-          ctx.textAlign = 'center'
-          ctx.fillText(l.bidVolume.toFixed(0), bidX + half / 2, y + rh / 2)
-          ctx.fillStyle = fg
-          ctx.fillText(l.askVolume.toFixed(0), askX + half / 2, y + rh / 2)
+          if (showPOC && l.price === pocPrice) {
+            ctx.strokeStyle = cssVar(host, '--accent', '#fbbf24') || '#fbbf24'
+            ctx.lineWidth = 1.5
+            ctx.strokeRect(x0 + 1.5, y + 0.5, cw - 3, rh - 2)
+          }
         }
 
-        if (showPOC && l.price === pocPrice) {
-          ctx.strokeStyle = cssVar(host, '--accent', '#fbbf24') || '#fbbf24'
-          ctx.lineWidth = 1.5
-          ctx.strokeRect(bidX + 0.5, y + 0.5, cw - 3, rh - 2)
+        // Candle wick/body along the column center.
+        const up = candle.close >= candle.open
+        ctx.strokeStyle = up ? 'rgba(74,222,128,0.65)' : 'rgba(248,113,113,0.65)'
+        ctx.lineWidth = 1
+        ctx.beginPath()
+        ctx.moveTo(center + 0.5, rowYForPrice(candle.high))
+        ctx.lineTo(center + 0.5, rowYForPrice(candle.low) + rh)
+        ctx.stroke()
+      } else {
+        for (const l of candle.levels) {
+          const y = rowYForPrice(l.price)
+          const diagBelow = byPrice.get(l.price - step)
+          const diagAbove = byPrice.get(l.price + step)
+          // Buy (ask) imbalance vs bid one level down; sell (bid) imbalance vs ask one level up.
+          const buyImb = diagBelow ? l.askVolume >= imbalanceRatio * Math.max(1e-9, diagBelow.bidVolume) : false
+          const sellImb = diagAbove ? l.bidVolume >= imbalanceRatio * Math.max(1e-9, diagAbove.askVolume) : false
+
+          // Bid cell (left)
+          ctx.fillStyle = `rgba(248,113,113,${intensity(l.bidVolume)})`
+          ctx.fillRect(bidX, y, half, rh - 1)
+          // Ask cell (right)
+          ctx.fillStyle = `rgba(74,222,128,${intensity(l.askVolume)})`
+          ctx.fillRect(askX, y, half, rh - 1)
+
+          if (sellImb) {
+            ctx.strokeStyle = 'rgba(248,113,113,0.9)'
+            ctx.lineWidth = 1
+            ctx.strokeRect(bidX + 0.5, y + 0.5, half - 1, rh - 2)
+          }
+          if (buyImb) {
+            ctx.strokeStyle = 'rgba(74,222,128,0.9)'
+            ctx.lineWidth = 1
+            ctx.strokeRect(askX + 0.5, y + 0.5, half - 1, rh - 2)
+          }
+
+          if (rh >= 11) {
+            ctx.fillStyle = muted
+            ctx.textAlign = 'center'
+            ctx.fillText(l.bidVolume.toFixed(0), bidX + half / 2, y + rh / 2)
+            ctx.fillStyle = fg
+            ctx.fillText(l.askVolume.toFixed(0), askX + half / 2, y + rh / 2)
+          }
+
+          if (showPOC && l.price === pocPrice) {
+            ctx.strokeStyle = cssVar(host, '--accent', '#fbbf24') || '#fbbf24'
+            ctx.lineWidth = 1.5
+            ctx.strokeRect(bidX + 0.5, y + 0.5, cw - 3, rh - 2)
+          }
         }
+
+        // Thin OHLC candle marker at the right edge of the column.
+        const markX = x0 + cw - 2
+        const up = candle.close >= candle.open
+        ctx.strokeStyle = up ? 'rgba(74,222,128,0.9)' : 'rgba(248,113,113,0.9)'
+        ctx.lineWidth = 1
+        ctx.beginPath()
+        ctx.moveTo(markX, rowYForPrice(candle.high))
+        ctx.lineTo(markX, rowYForPrice(candle.low) + rh)
+        ctx.stroke()
+        ctx.lineWidth = 3
+        ctx.beginPath()
+        ctx.moveTo(markX, rowYForPrice(Math.max(candle.open, candle.close)))
+        ctx.lineTo(markX, rowYForPrice(Math.min(candle.open, candle.close)) + rh)
+        ctx.stroke()
       }
-
-      // Thin OHLC candle marker at the right edge of the column.
-      const markX = x0 + cw - 2
-      const up = candle.close >= candle.open
-      ctx.strokeStyle = up ? 'rgba(74,222,128,0.9)' : 'rgba(248,113,113,0.9)'
-      ctx.lineWidth = 1
-      ctx.beginPath()
-      ctx.moveTo(markX, rowYForPrice(candle.high))
-      ctx.lineTo(markX, rowYForPrice(candle.low) + rh)
-      ctx.stroke()
-      ctx.lineWidth = 3
-      ctx.beginPath()
-      ctx.moveTo(markX, rowYForPrice(Math.max(candle.open, candle.close)))
-      ctx.lineTo(markX, rowYForPrice(Math.min(candle.open, candle.close)) + rh)
-      ctx.stroke()
 
       // Time axis label.
       ctx.fillStyle = muted
@@ -227,7 +266,7 @@ export function Footprint({
     ctx.moveTo(0, plotHeight + 0.5)
     ctx.lineTo(size.width, plotHeight + 0.5)
     ctx.stroke()
-  }, [candles, priceDecimals, imbalanceRatio, showPOC, tickSize, size])
+  }, [candles, mode, priceDecimals, imbalanceRatio, showPOC, tickSize, size])
 
   return (
     <div

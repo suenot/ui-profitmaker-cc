@@ -50,3 +50,7 @@ export const Default: Story = {
 export const ImbalanceHighlighting: Story = {
   args: { candles, priceDecimals: 0, tickSize: 1, imbalanceRatio: 2, showPOC: true },
 }
+
+export const Profile: Story = {
+  args: { candles, mode: 'profile', priceDecimals: 0, tickSize: 1, showPOC: true },
+}
