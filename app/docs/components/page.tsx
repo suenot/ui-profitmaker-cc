@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/ca
 const components = [
   { title: 'Button', href: '/docs/components/button', category: 'Base UI', description: 'Primary interaction element with multiple variants.' },
   { title: 'Badge', href: '/docs/components/badge', category: 'Base UI', description: 'Small label for status, tags, or categories.' },
-  { title: 'Card', href: '/docs/components/card', category: 'Base UI', description: 'Glassmorphism container with header, content, and footer.' },
+  { title: 'Card', href: '/docs/components/card', category: 'Base UI', description: 'Container with header, content, and footer.' },
   { title: 'Input', href: '/docs/components/input', category: 'Base UI', description: 'Styled text input for forms and search.' },
   { title: 'Checkbox', href: '/docs/components/checkbox', category: 'Forms', description: 'Accessible checkbox with checked and unchecked states.' },
   { title: 'Label', href: '/docs/components/label', category: 'Forms', description: 'Accessible label associated with form controls.' },
@@ -52,7 +52,7 @@ export default function ComponentsPage() {
               <CardHeader>
                 <div className="flex items-start justify-between gap-2 mb-1">
                   <CardTitle className="text-lg group-hover:text-accent transition-colors">{c.title}</CardTitle>
-                  <Badge variant="muted" className="shrink-0 text-xs">{c.category}</Badge>
+                  <Badge variant="secondary" className="shrink-0 text-xs">{c.category}</Badge>
                 </div>
                 <CardDescription>{c.description}</CardDescription>
               </CardHeader>

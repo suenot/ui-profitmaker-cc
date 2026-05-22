@@ -46,7 +46,7 @@ export default function HomePage() {
 
       {/* Hero */}
       <section className="relative pt-28 pb-24 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.12),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(96,165,250,0.10),transparent_60%)]" />
         <div className="container mx-auto px-4 text-center relative z-10">
           <Badge className="mb-6">Open source · {getComponentCountLabel()} components</Badge>
           <h1 className="text-5xl sm:text-7xl font-black tracking-tight leading-[1.1] pb-2">
@@ -140,8 +140,8 @@ export default function HomePage() {
               <div className="flex flex-wrap gap-3">
                 <Badge>Live</Badge>
                 <Badge variant="outline">Open Source</Badge>
-                <Badge variant="solid">New</Badge>
-                <Badge variant="muted">Beta</Badge>
+                <Badge variant="default">New</Badge>
+                <Badge variant="secondary">Beta</Badge>
               </div>
             </div>
             {/* Cards */}
@@ -155,7 +155,7 @@ export default function HomePage() {
                   </CardHeader>
                   <CardContent>
                     <div className="flex items-center gap-2">
-                      <Badge variant="solid">BUY</Badge>
+                      <Badge variant="default">BUY</Badge>
                       <span className="text-sm text-muted-foreground">BTC/USDT · Confidence 87%</span>
                     </div>
                   </CardContent>

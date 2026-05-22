@@ -38,7 +38,7 @@ export const WithFooter: Story = {
       <CardContent>
         <div className="flex gap-2 flex-wrap">
           <Badge>Python</Badge>
-          <Badge variant="muted">Backtested</Badge>
+          <Badge variant="secondary">Backtested</Badge>
           <Badge variant="outline">Live</Badge>
         </div>
       </CardContent>

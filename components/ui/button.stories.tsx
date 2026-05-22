@@ -9,7 +9,7 @@ const meta: Meta<typeof Button> = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['default', 'outline', 'ghost', 'destructive', 'link'],
+      options: ['default', 'secondary', 'destructive', 'outline', 'ghost', 'link'],
     },
     size: {
       control: 'select',
@@ -24,19 +24,27 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
-  args: { children: 'Get Started' },
+  args: { children: 'Place Order' },
+}
+
+export const Secondary: Story = {
+  args: { variant: 'secondary', children: 'Connect Exchange' },
+}
+
+export const Destructive: Story = {
+  args: { variant: 'destructive', children: 'Cancel Order' },
 }
 
 export const Outline: Story = {
-  args: { variant: 'outline', children: 'Read Whitepaper' },
+  args: { variant: 'outline', children: 'Cancel' },
 }
 
 export const Ghost: Story = {
   args: { variant: 'ghost', children: 'Learn More' },
 }
 
-export const Destructive: Story = {
-  args: { variant: 'destructive', children: 'Delete Strategy' },
+export const Link: Story = {
+  args: { variant: 'link', children: 'View docs' },
 }
 
 export const Small: Story = {
@@ -44,7 +52,7 @@ export const Small: Story = {
 }
 
 export const Large: Story = {
-  args: { size: 'lg', children: 'Invest Now' },
+  args: { size: 'lg', children: 'Large' },
 }
 
 export const Disabled: Story = {
@@ -55,9 +63,11 @@ export const AllVariants: Story = {
   render: () => (
     <div className="flex flex-wrap items-center gap-4">
       <Button>Default</Button>
+      <Button variant="secondary">Secondary</Button>
+      <Button variant="destructive">Destructive</Button>
       <Button variant="outline">Outline</Button>
       <Button variant="ghost">Ghost</Button>
-      <Button variant="destructive">Destructive</Button>
+      <Button variant="link">Link</Button>
     </div>
   ),
 }
