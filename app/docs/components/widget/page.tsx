@@ -42,6 +42,10 @@ export interface WidgetProps {
   onInstrumentSearch?: () => void
   onTitleChange?: (title: string) => void
   headerActions?: React.ReactNode
+  showSettings?: boolean
+  showMinimize?: boolean
+  showMaximize?: boolean
+  showClose?: boolean
   onSettings?: () => void
   onMinimize?: () => void
   onMaximize?: () => void
@@ -105,7 +109,8 @@ export default function WidgetPage() {
         { name: 'showInstrumentSearch', type: 'boolean', defaultValue: 'true', description: 'Show the instrument-search (magnifier) icon next to the group dot' },
         { name: 'onInstrumentSearch', type: '() => void', description: 'Called when the header search icon is clicked' },
         { name: 'headerActions', type: 'ReactNode', description: 'Extra controls in the header' },
-        { name: 'onSettings / onMinimize / onClose', type: '() => void', description: 'Show the matching header action icon when provided' },
+        { name: 'showSettings / showMinimize / showMaximize / showClose', type: 'boolean', defaultValue: 'true', description: 'Standard header control icons — shown by default; set false to hide' },
+        { name: 'onSettings / onMinimize / onMaximize / onClose', type: '() => void', description: 'Optional handlers for the matching header control icon' },
         { name: 'className', type: 'string', description: 'Classes for the widget shell' },
         { name: 'contentClassName', type: 'string', description: 'Classes for the content area' },
       ]} />

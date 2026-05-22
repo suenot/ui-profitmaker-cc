@@ -23,6 +23,11 @@ export interface WidgetProps {
   /** Called when the title is edited (double-click the title to edit). */
   onTitleChange?: (title: string) => void
   headerActions?: React.ReactNode
+  /** Header control icons — shown by default as standard widget chrome. */
+  showSettings?: boolean
+  showMinimize?: boolean
+  showMaximize?: boolean
+  showClose?: boolean
   onSettings?: () => void
   onMinimize?: () => void
   onMaximize?: () => void
@@ -44,6 +49,10 @@ export function Widget({
   onInstrumentSearch,
   onTitleChange,
   headerActions,
+  showSettings = true,
+  showMinimize = true,
+  showMaximize = true,
+  showClose = true,
   onSettings,
   onMinimize,
   onMaximize,
@@ -154,7 +163,7 @@ export function Widget({
 
         <div className="flex items-center gap-1">
           {headerActions}
-          {onSettings && (
+          {showSettings && (
             <button
               type="button"
               onClick={onSettings}
@@ -164,7 +173,7 @@ export function Widget({
               <Settings size={14} />
             </button>
           )}
-          {onMinimize && (
+          {showMinimize && (
             <button
               type="button"
               onClick={onMinimize}
@@ -174,7 +183,7 @@ export function Widget({
               <Minus size={14} />
             </button>
           )}
-          {onMaximize && (
+          {showMaximize && (
             <button
               type="button"
               onClick={onMaximize}
@@ -184,7 +193,7 @@ export function Widget({
               <Maximize2 size={14} />
             </button>
           )}
-          {onClose && (
+          {showClose && (
             <button
               type="button"
               onClick={onClose}
