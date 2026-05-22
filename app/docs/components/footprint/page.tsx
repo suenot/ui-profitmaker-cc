@@ -138,6 +138,7 @@ export default function FootprintPage() {
         { name: 'priceDecimals', type: 'number', defaultValue: '2', description: 'Decimals for price axis labels' },
         { name: 'imbalanceRatio', type: 'number', defaultValue: '3', description: 'Outline a cell when its volume >= ratio × the diagonal opposite volume' },
         { name: 'showPOC', type: 'boolean', defaultValue: 'true', description: 'Box the point-of-control (max-volume) level per candle' },
+        { name: 'showDelta', type: 'boolean', defaultValue: 'true', description: 'Per-candle delta (ask − bid volume) footer row' },
         { name: 'tickSize', type: 'number', description: 'Price step between rows (auto-inferred if omitted)' },
         { name: 'width', type: 'number', description: 'Fixed pixel width (otherwise fills container)' },
         { name: 'height', type: 'number', description: 'Fixed pixel height (otherwise fills container)' },

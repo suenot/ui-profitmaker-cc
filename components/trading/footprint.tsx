@@ -26,6 +26,8 @@ export interface FootprintProps {
   /** Imbalance trigger: a side is flagged when its volume >= ratio × the diagonal opposite volume (numbers mode). */
   imbalanceRatio?: number
   showPOC?: boolean
+  /** Show the per-candle delta (ask − bid volume) footer row. */
+  showDelta?: boolean
   tickSize?: number
   width?: number
   height?: number
@@ -41,6 +43,7 @@ const COL_WIDTH = 110
 const ROW_HEIGHT = 16
 const PRICE_GUTTER = 56
 const AXIS_HEIGHT = 18
+const DELTA_HEIGHT = 18
 
 // Read a CSS color from the canvas host so we honor the active theme.
 function cssVar(el: HTMLElement, name: string, fallback: string): string {
@@ -54,6 +57,7 @@ export function Footprint({
   priceDecimals = 2,
   imbalanceRatio = 3,
   showPOC = true,
+  showDelta = true,
   tickSize,
   width,
   height,
@@ -113,7 +117,8 @@ export function Footprint({
       })()
 
     const rowCount = Math.max(1, Math.round((maxPrice - minPrice) / step) + 1)
-    const plotHeight = size.height - AXIS_HEIGHT
+    const deltaH = showDelta ? DELTA_HEIGHT : 0
+    const plotHeight = size.height - AXIS_HEIGHT - deltaH
     const rh = Math.min(ROW_HEIGHT, plotHeight / rowCount)
     const cw = Math.min(COL_WIDTH, (size.width - PRICE_GUTTER) / candles.length)
     const half = (cw - 2) / 2
@@ -162,9 +167,14 @@ export function Footprint({
           const y = rowYForPrice(l.price)
           const bidLen = (l.bidVolume / maxSide) * maxBar
           const askLen = (l.askVolume / maxSide) * maxBar
-          ctx.fillStyle = 'rgba(248,113,113,0.85)'
+          const diagBelow = byPrice.get(l.price - step)
+          const diagAbove = byPrice.get(l.price + step)
+          const buyImb = diagBelow ? l.askVolume >= imbalanceRatio * Math.max(1e-9, diagBelow.bidVolume) : false
+          const sellImb = diagAbove ? l.bidVolume >= imbalanceRatio * Math.max(1e-9, diagAbove.askVolume) : false
+
+          ctx.fillStyle = sellImb ? 'rgba(248,113,113,1)' : 'rgba(248,113,113,0.8)'
           ctx.fillRect(center - bidLen, y + 1, bidLen, rh - 2)
-          ctx.fillStyle = 'rgba(74,222,128,0.85)'
+          ctx.fillStyle = buyImb ? 'rgba(74,222,128,1)' : 'rgba(74,222,128,0.8)'
           ctx.fillRect(center, y + 1, askLen, rh - 2)
 
           if (showPOC && l.price === pocPrice) {
@@ -240,6 +250,20 @@ export function Footprint({
         ctx.stroke()
       }
 
+      // Per-candle delta footer (ask − bid volume).
+      if (showDelta) {
+        let bidSum = 0
+        let askSum = 0
+        for (const l of candle.levels) {
+          bidSum += l.bidVolume
+          askSum += l.askVolume
+        }
+        const delta = askSum - bidSum
+        ctx.fillStyle = delta >= 0 ? 'rgba(74,222,128,0.95)' : 'rgba(248,113,113,0.95)'
+        ctx.textAlign = 'center'
+        ctx.fillText(`${delta >= 0 ? '+' : ''}${delta.toFixed(0)}`, x0 + cw / 2, plotHeight + deltaH / 2)
+      }
+
       // Time axis label.
       ctx.fillStyle = muted
       ctx.textAlign = 'center'
@@ -262,11 +286,15 @@ export function Footprint({
     ctx.lineWidth = 1
     ctx.beginPath()
     ctx.moveTo(PRICE_GUTTER, 0)
-    ctx.lineTo(PRICE_GUTTER, plotHeight)
+    ctx.lineTo(PRICE_GUTTER, plotHeight + deltaH)
     ctx.moveTo(0, plotHeight + 0.5)
     ctx.lineTo(size.width, plotHeight + 0.5)
+    if (deltaH) {
+      ctx.moveTo(0, plotHeight + deltaH + 0.5)
+      ctx.lineTo(size.width, plotHeight + deltaH + 0.5)
+    }
     ctx.stroke()
-  }, [candles, mode, priceDecimals, imbalanceRatio, showPOC, tickSize, size])
+  }, [candles, mode, priceDecimals, imbalanceRatio, showPOC, showDelta, tickSize, size])
 
   return (
     <div

@@ -53,11 +53,29 @@ function lerp(a: number, b: number, t: number) {
   return Math.round(a + (b - a) * t)
 }
 
-// Side colors: dark resting fill -> bright wall, like a depth heatmap.
-const ASK_DARK: [number, number, number] = [54, 18, 24]
-const ASK_BRIGHT: [number, number, number] = [255, 86, 96]
-const BID_DARK: [number, number, number] = [14, 44, 30]
-const BID_BRIGHT: [number, number, number] = [74, 226, 140]
+// Side ramps: dark resting fill -> saturated -> near-white wall (depth heatmap).
+type Ramp = [number, [number, number, number]][]
+const ASK_RAMP: Ramp = [
+  [0, [34, 12, 16]],
+  [0.55, [228, 66, 76]],
+  [1, [255, 178, 180]],
+]
+const BID_RAMP: Ramp = [
+  [0, [10, 38, 24]],
+  [0.55, [56, 206, 128]],
+  [1, [196, 255, 208]],
+]
+function rampColor(ramp: Ramp, t: number): [number, number, number] {
+  for (let i = 1; i < ramp.length; i++) {
+    if (t <= ramp[i][0]) {
+      const [t0, c0] = ramp[i - 1]
+      const [t1, c1] = ramp[i]
+      const f = (t - t0) / (t1 - t0 || 1)
+      return [lerp(c0[0], c1[0], f), lerp(c0[1], c1[1], f), lerp(c0[2], c1[2], f)]
+    }
+  }
+  return ramp[ramp.length - 1][1]
+}
 
 function heatColor(t: number): [number, number, number] {
   const stops: [number, [number, number, number]][] = [
@@ -162,9 +180,8 @@ export function Heatmap({
       }
       if (colorScale === 'mono') return `rgba(74,222,128,${0.08 + 0.9 * t})`
       const isAsk = l.side ? l.side === 'ask' : l.price >= mid
-      const [dk, br] = isAsk ? [ASK_DARK, ASK_BRIGHT] : [BID_DARK, BID_BRIGHT]
-      const f = Math.pow(t, 0.8)
-      return `rgb(${lerp(dk[0], br[0], f)},${lerp(dk[1], br[1], f)},${lerp(dk[2], br[2], f)})`
+      const [r, g, b] = rampColor(isAsk ? ASK_RAMP : BID_RAMP, Math.pow(t, 0.72))
+      return `rgb(${r},${g},${b})`
     }
 
     slices.forEach((slice, si) => {
