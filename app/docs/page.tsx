@@ -12,10 +12,13 @@ export default function DocsPage() {
         Components are built with Tailwind CSS, TypeScript, and follow the design system used across all profitmaker.cc products.
       </p>
 
-      <h2 className="text-2xl font-black tracking-tight mb-4 mt-10">Philosophy</h2>
+      <h2 className="text-2xl font-black tracking-tight mb-4 mt-10">Two ways to use it</h2>
       <p className="text-muted-foreground font-light leading-relaxed mb-6">
-        This is not a traditional npm package. It is a collection of source components that you copy directly into your project.
-        You own the code — customize freely.
+        Install the <a href="/docs/installation" className="text-accent-darker hover:underline">npm package</a>{' '}
+        <code className="bg-muted px-1.5 py-0.5 rounded font-mono text-sm">@profitmaker/ui</code> and import components
+        directly — ESM, tree-shakeable, with a chunk per component for lazy loading. Or copy the source from any
+        component&apos;s <strong className="text-foreground font-bold">Source</strong> tab into your project and own the
+        code outright. Both stay in sync with the same design system.
       </p>
 
       <h2 className="text-2xl font-black tracking-tight mb-4 mt-10">Prerequisites</h2>

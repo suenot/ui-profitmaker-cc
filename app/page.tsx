@@ -75,10 +75,9 @@ export default function HomePage() {
             live trading widgets like order books and portfolios. Copy-paste ready, built with Tailwind CSS and TypeScript.
           </p>
           <div className="hidden sm:inline-flex items-center gap-2 rounded-xl border border-border bg-card/50 px-4 py-2 font-mono text-sm mb-10 max-w-full overflow-x-auto">
-            <span className="text-accent-darker">import</span>
-            <span className="text-foreground">{'{ OrderBook }'}</span>
-            <span className="text-accent-darker">from</span>
-            <span className="text-muted-foreground">{"'@/components/trading/order-book'"}</span>
+            <span className="text-muted-foreground">$</span>
+            <span className="text-foreground">npm i</span>
+            <span className="text-accent-darker">@profitmaker/ui</span>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Button asChild size="lg">
@@ -204,6 +203,36 @@ export default function HomePage() {
           <div className="text-center mt-10">
             <Button asChild variant="outline">
               <Link href="/docs/components">View All Components →</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Install */}
+      <section className="py-24">
+        <div className="container mx-auto px-4">
+          <SectionHeader
+            badge="Install"
+            title="One command"
+            subtitle="Ship as an npm package — ESM, tree-shakeable, a chunk per component. Or copy the source. Your call."
+          />
+          <div className="max-w-3xl mx-auto space-y-6">
+            <div>
+              <p className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-3">1 · Install</p>
+              <pre className="rounded-2xl border border-border bg-[#0d0f14] px-5 py-4 font-mono text-sm text-foreground overflow-x-auto">npm install @profitmaker/ui</pre>
+            </div>
+            <div>
+              <p className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-3">2 · Wire up tokens + Tailwind</p>
+              <pre className="rounded-2xl border border-border bg-[#0d0f14] px-5 py-4 font-mono text-sm overflow-x-auto"><span className="text-muted-foreground">{"// app/layout.tsx"}</span>{"\n"}<span className="text-accent-darker">import</span> <span className="text-muted-foreground">{"'@profitmaker/ui/styles.css'"}</span>{"\n\n"}<span className="text-muted-foreground">{"// tailwind.config.js"}</span>{"\n"}presets: [<span className="text-foreground">require(</span><span className="text-muted-foreground">{"'@profitmaker/ui/tailwind-preset'"}</span><span className="text-foreground">)</span>]</pre>
+            </div>
+            <div>
+              <p className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-3">3 · Import what you need</p>
+              <pre className="rounded-2xl border border-border bg-[#0d0f14] px-5 py-4 font-mono text-sm overflow-x-auto"><span className="text-muted-foreground">{"// tree-shaken named imports"}</span>{"\n"}<span className="text-accent-darker">import</span>{" { Button, OrderBook } "}<span className="text-accent-darker">from</span> <span className="text-muted-foreground">{"'@profitmaker/ui'"}</span>{"\n\n"}<span className="text-muted-foreground">{"// per-component subpath — lazy loads a single chunk"}</span>{"\n"}<span className="text-accent-darker">import</span>{" { OrderForm } "}<span className="text-accent-darker">from</span> <span className="text-muted-foreground">{"'@profitmaker/ui/order-form'"}</span></pre>
+            </div>
+          </div>
+          <div className="text-center mt-10">
+            <Button asChild>
+              <Link href="/docs/installation">Full Installation Guide →</Link>
             </Button>
           </div>
         </div>

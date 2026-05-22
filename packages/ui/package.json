@@ -1,0 +1,209 @@
+{
+  "name": "@profitmaker/ui",
+  "version": "0.1.0",
+  "description": "Trading-focused React component library behind profitmaker.cc \u2014 primitives plus live trading widgets (order book, order form, portfolio, deals list).",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "dist",
+    "tailwind-preset.cjs",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./styles.css": "./dist/styles.css",
+    "./tailwind-preset": "./tailwind-preset.cjs",
+    "./accordion": {
+      "types": "./dist/accordion.d.ts",
+      "import": "./dist/accordion.js"
+    },
+    "./alert": {
+      "types": "./dist/alert.d.ts",
+      "import": "./dist/alert.js"
+    },
+    "./avatar": {
+      "types": "./dist/avatar.d.ts",
+      "import": "./dist/avatar.js"
+    },
+    "./badge": {
+      "types": "./dist/badge.d.ts",
+      "import": "./dist/badge.js"
+    },
+    "./button": {
+      "types": "./dist/button.d.ts",
+      "import": "./dist/button.js"
+    },
+    "./card": {
+      "types": "./dist/card.d.ts",
+      "import": "./dist/card.js"
+    },
+    "./checkbox": {
+      "types": "./dist/checkbox.d.ts",
+      "import": "./dist/checkbox.js"
+    },
+    "./dialog": {
+      "types": "./dist/dialog.d.ts",
+      "import": "./dist/dialog.js"
+    },
+    "./dropdown-menu": {
+      "types": "./dist/dropdown-menu.d.ts",
+      "import": "./dist/dropdown-menu.js"
+    },
+    "./input": {
+      "types": "./dist/input.d.ts",
+      "import": "./dist/input.js"
+    },
+    "./label": {
+      "types": "./dist/label.d.ts",
+      "import": "./dist/label.js"
+    },
+    "./popover": {
+      "types": "./dist/popover.d.ts",
+      "import": "./dist/popover.js"
+    },
+    "./progress": {
+      "types": "./dist/progress.d.ts",
+      "import": "./dist/progress.js"
+    },
+    "./radio-group": {
+      "types": "./dist/radio-group.d.ts",
+      "import": "./dist/radio-group.js"
+    },
+    "./scroll-area": {
+      "types": "./dist/scroll-area.d.ts",
+      "import": "./dist/scroll-area.js"
+    },
+    "./select": {
+      "types": "./dist/select.d.ts",
+      "import": "./dist/select.js"
+    },
+    "./separator": {
+      "types": "./dist/separator.d.ts",
+      "import": "./dist/separator.js"
+    },
+    "./skeleton": {
+      "types": "./dist/skeleton.d.ts",
+      "import": "./dist/skeleton.js"
+    },
+    "./slider": {
+      "types": "./dist/slider.d.ts",
+      "import": "./dist/slider.js"
+    },
+    "./switch": {
+      "types": "./dist/switch.d.ts",
+      "import": "./dist/switch.js"
+    },
+    "./table": {
+      "types": "./dist/table.d.ts",
+      "import": "./dist/table.js"
+    },
+    "./tabs": {
+      "types": "./dist/tabs.d.ts",
+      "import": "./dist/tabs.js"
+    },
+    "./textarea": {
+      "types": "./dist/textarea.d.ts",
+      "import": "./dist/textarea.js"
+    },
+    "./toggle": {
+      "types": "./dist/toggle.d.ts",
+      "import": "./dist/toggle.js"
+    },
+    "./tooltip": {
+      "types": "./dist/tooltip.d.ts",
+      "import": "./dist/tooltip.js"
+    },
+    "./deals-list": {
+      "types": "./dist/deals-list.d.ts",
+      "import": "./dist/deals-list.js"
+    },
+    "./instrument-search": {
+      "types": "./dist/instrument-search.d.ts",
+      "import": "./dist/instrument-search.js"
+    },
+    "./order-book": {
+      "types": "./dist/order-book.d.ts",
+      "import": "./dist/order-book.js"
+    },
+    "./order-form": {
+      "types": "./dist/order-form.d.ts",
+      "import": "./dist/order-form.js"
+    },
+    "./portfolio": {
+      "types": "./dist/portfolio.d.ts",
+      "import": "./dist/portfolio.js"
+    },
+    "./searchable-select": {
+      "types": "./dist/searchable-select.d.ts",
+      "import": "./dist/searchable-select.js"
+    },
+    "./timeframe-select": {
+      "types": "./dist/timeframe-select.d.ts",
+      "import": "./dist/timeframe-select.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "prepublishOnly": "tsup"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "dependencies": {
+    "@radix-ui/react-accordion": "^1.2.0",
+    "@radix-ui/react-avatar": "^1.1.1",
+    "@radix-ui/react-checkbox": "^1.1.3",
+    "@radix-ui/react-dialog": "^1.1.4",
+    "@radix-ui/react-dropdown-menu": "^2.1.4",
+    "@radix-ui/react-label": "^2.1.1",
+    "@radix-ui/react-popover": "^1.1.4",
+    "@radix-ui/react-progress": "^1.1.1",
+    "@radix-ui/react-radio-group": "^1.2.2",
+    "@radix-ui/react-scroll-area": "^1.2.2",
+    "@radix-ui/react-select": "^2.1.4",
+    "@radix-ui/react-separator": "^1.1.1",
+    "@radix-ui/react-slider": "^1.2.2",
+    "@radix-ui/react-slot": "^1.1.0",
+    "@radix-ui/react-switch": "^1.1.2",
+    "@radix-ui/react-tabs": "^1.1.2",
+    "@radix-ui/react-toggle": "^1.1.1",
+    "@radix-ui/react-tooltip": "^1.1.6",
+    "@tanstack/react-virtual": "^3.13.10",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.462.0",
+    "tailwind-merge": "^2.5.2"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.0",
+    "typescript": "^5",
+    "esbuild-plugin-preserve-directives": "^0.0.11",
+    "@types/react": "^19",
+    "@types/react-dom": "^19"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/suenot/ui-profitmaker-cc.git"
+  },
+  "keywords": [
+    "react",
+    "ui",
+    "components",
+    "trading",
+    "tailwind",
+    "crypto",
+    "order-book",
+    "profitmaker"
+  ]
+}
