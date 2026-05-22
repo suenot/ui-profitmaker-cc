@@ -6,12 +6,20 @@ import { CodeBlock } from '@/components/docs/code-block'
 import { PropsTable } from '@/components/docs/props-table'
 import { OrderBook } from '@/components/trading/order-book'
 
+// bids: highest price first · asks: lowest price first
 const bids = [
   { price: 67234.5, amount: 0.452 },
   { price: 67233.0, amount: 1.21 },
   { price: 67231.8, amount: 0.087 },
   { price: 67230.2, amount: 2.5 },
   { price: 67228.9, amount: 0.64 },
+  { price: 67227.3, amount: 1.04 },
+  { price: 67225.8, amount: 0.318 },
+  { price: 67224.1, amount: 2.17 },
+  { price: 67222.6, amount: 0.55 },
+  { price: 67221.0, amount: 1.62 },
+  { price: 67219.4, amount: 0.92 },
+  { price: 67217.9, amount: 3.41 },
 ]
 
 const asks = [
@@ -20,13 +28,20 @@ const asks = [
   { price: 67239.0, amount: 1.78 },
   { price: 67240.7, amount: 0.42 },
   { price: 67242.3, amount: 3.1 },
+  { price: 67243.8, amount: 0.74 },
+  { price: 67245.1, amount: 1.36 },
+  { price: 67246.9, amount: 0.21 },
+  { price: 67248.2, amount: 2.05 },
+  { price: 67250.0, amount: 0.88 },
+  { price: 67251.7, amount: 1.19 },
+  { price: 67253.4, amount: 0.47 },
 ]
 
 const previewCode = `import { OrderBook } from '@/components/trading/order-book'
 
 export default function Example() {
   return (
-    <div className="h-[400px] w-72 rounded-md border border-border bg-card">
+    <div className="w-72 rounded-md border border-border bg-card">
       <OrderBook
         priceDecimals={1}
         amountDecimals={3}
@@ -63,12 +78,13 @@ export interface OrderBookProps {
   showCumulative?: boolean
   priceDecimals?: number
   amountDecimals?: number
+  rowsVisible?: number
   className?: string
 }
 
 // Virtualized depth ladder: asks (red) on top, spread row, bids (green) on
-// bottom. Uses @tanstack/react-virtual for both sides. Fills its parent's
-// height — wrap it in a sized container.`
+// bottom. Each side sizes to its content; pass rowsVisible to cap a side's
+// height and let it scroll.`
 
 export default function OrderBookPage() {
   return (
@@ -82,7 +98,7 @@ export default function OrderBookPage() {
 
       <h2 className="text-xl font-black tracking-tight mb-4 mt-10">Preview</h2>
       <ComponentPreview code={previewCode} storyId="trading-orderbook--default">
-        <div className="h-[400px] w-72 rounded-md border border-border bg-card">
+        <div className="w-72 rounded-md border border-border bg-card">
           <OrderBook bids={bids} asks={asks} priceDecimals={1} amountDecimals={3} />
         </div>
       </ComponentPreview>
@@ -99,6 +115,7 @@ export default function OrderBookPage() {
         { name: 'showCumulative', type: 'boolean', defaultValue: 'false', description: 'Show cumulative amount instead of total in the last column' },
         { name: 'priceDecimals', type: 'number', defaultValue: '2', description: 'Decimals for price formatting' },
         { name: 'amountDecimals', type: 'number', defaultValue: '4', description: 'Decimals for amount formatting' },
+        { name: 'rowsVisible', type: 'number', description: 'Max rows per side before it scrolls (default: show all)' },
         { name: 'className', type: 'string', description: 'Additional CSS classes' },
       ]} />
     </div>

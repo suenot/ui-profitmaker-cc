@@ -51,7 +51,7 @@ export function ComponentPreview({ children, code, language = 'tsx', storyId, cl
       </div>
 
       {tab === 'preview' && (
-        <div className={cn('flex min-h-[200px] items-center justify-center p-8 bg-background/50 bg-grid', previewClassName)}>
+        <div className={cn('flex min-h-[360px] items-center justify-center p-8 bg-background/50 bg-grid', previewClassName)}>
           {children}
         </div>
       )}

@@ -55,6 +55,8 @@ const nav = [
   {
     title: 'Trading',
     items: [
+      { title: 'Widget', href: '/docs/components/widget' },
+      { title: 'Group Color Selector', href: '/docs/components/group-color-selector' },
       { title: 'Searchable Select', href: '/docs/components/searchable-select' },
       { title: 'Timeframe Select', href: '/docs/components/timeframe-select' },
       { title: 'Instrument Search', href: '/docs/components/instrument-search' },

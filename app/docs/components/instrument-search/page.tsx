@@ -75,7 +75,7 @@ export default function InstrumentSearchPage() {
       </p>
 
       <h2 className="text-xl font-black tracking-tight mb-4 mt-10">Preview</h2>
-      <ComponentPreview code={previewCode} storyId="trading-instrumentsearch--default">
+      <ComponentPreview code={previewCode} storyId="trading-instrumentsearch--default" previewClassName="items-start min-h-[440px]">
         <div className="w-96">
           <InstrumentSearch value={value} onChange={setValue} instruments={sampleInstruments} />
         </div>

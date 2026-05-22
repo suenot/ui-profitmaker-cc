@@ -5,6 +5,29 @@ import { OrderForm } from '@/components/trading/order-form'
 import { DealsList, type Deal } from '@/components/trading/deals-list'
 import { InstrumentSearch, type Instrument } from '@/components/trading/instrument-search'
 import { TimeframeSelect } from '@/components/trading/timeframe-select'
+import { Widget } from '@/components/trading/widget'
+import { OrderBook } from '@/components/trading/order-book'
+
+const sampleBids = [
+  { price: 67234.5, amount: 0.452 },
+  { price: 67233.0, amount: 1.21 },
+  { price: 67231.8, amount: 0.087 },
+  { price: 67230.2, amount: 2.5 },
+  { price: 67228.9, amount: 0.64 },
+  { price: 67227.3, amount: 1.04 },
+  { price: 67225.8, amount: 0.318 },
+  { price: 67224.1, amount: 2.17 },
+]
+const sampleAsks = [
+  { price: 67236.1, amount: 0.331 },
+  { price: 67237.4, amount: 0.95 },
+  { price: 67239.0, amount: 1.78 },
+  { price: 67240.7, amount: 0.42 },
+  { price: 67242.3, amount: 3.1 },
+  { price: 67243.8, amount: 0.74 },
+  { price: 67245.1, amount: 1.36 },
+  { price: 67246.9, amount: 0.21 },
+]
 
 const sampleInstruments: Instrument[] = [
   { account: 'main@binance', exchange: 'binance', market: 'spot', pair: 'BTC/USDT' },
@@ -76,8 +99,13 @@ export function TradingShowcase() {
   const exchange = instrument?.exchange ?? 'binance'
   const market = instrument?.market ?? 'spot'
 
+  const [chartGroup, setChartGroup] = React.useState<string | undefined>('blue')
+  const [bookGroup, setBookGroup] = React.useState<string | undefined>('blue')
+  const [pnlGroup, setPnlGroup] = React.useState<string | undefined>('orange')
+
   return (
-    <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
+    <div className="mt-8 space-y-8">
+    <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
       {/* Instrument toolbar + order form */}
       <div className="rounded-3xl border border-border bg-card/40 p-6 backdrop-blur-xl">
         <p className="mb-3 px-1 text-xs font-black uppercase tracking-widest text-muted-foreground">
@@ -118,6 +146,32 @@ export function TradingShowcase() {
           />
         </div>
       </div>
+    </div>
+
+    {/* Widget color groups — the signature profitmaker.cc feature */}
+    <div className="rounded-3xl border border-border bg-card/40 p-6 backdrop-blur-xl">
+      <p className="mb-1 px-1 text-xs font-black uppercase tracking-widest text-muted-foreground">
+        Widget Groups
+      </p>
+      <p className="mb-4 px-1 text-sm text-muted-foreground font-light">
+        Click a header dot to assign a color group. Widgets sharing a color are linked — the convention
+        for syncing one instrument across panels. Two of these share blue.
+      </p>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <Widget title="Chart" instrument="BTC/USDT" groupId={chartGroup} onGroupChange={setChartGroup} className="h-56" onSettings={() => {}} onClose={() => {}}>
+          <div className="flex h-full items-center justify-center text-xs text-muted-foreground">Price chart</div>
+        </Widget>
+        <Widget title="Order Book" instrument="BTC/USDT" groupId={bookGroup} onGroupChange={setBookGroup} className="h-56" contentClassName="p-0" onSettings={() => {}} onClose={() => {}}>
+          <OrderBook bids={sampleBids} asks={sampleAsks} priceDecimals={1} amountDecimals={3} rowsVisible={6} />
+        </Widget>
+        <Widget title="PnL" instrument="ETH/USDT" groupId={pnlGroup} onGroupChange={setPnlGroup} className="h-56" onSettings={() => {}} onClose={() => {}}>
+          <div className="flex h-full flex-col items-center justify-center">
+            <span className="text-2xl font-black text-green-400">+12.4%</span>
+            <span className="text-xs text-muted-foreground">this month</span>
+          </div>
+        </Widget>
+      </div>
+    </div>
     </div>
   )
 }

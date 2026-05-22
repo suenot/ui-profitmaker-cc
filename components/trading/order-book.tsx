@@ -16,8 +16,12 @@ export interface OrderBookProps {
   showCumulative?: boolean
   priceDecimals?: number
   amountDecimals?: number
+  /** Max rows shown per side before that side scrolls. Defaults to showing every level (no gaps, no scroll). */
+  rowsVisible?: number
   className?: string
 }
+
+const ROW_HEIGHT = 24
 
 interface ProcessedLevel {
   price: number
@@ -33,6 +37,7 @@ export function OrderBook({
   showCumulative = false,
   priceDecimals = 2,
   amountDecimals = 4,
+  rowsVisible,
   className,
 }: OrderBookProps) {
   const formatPrice = (price: number): string => price.toFixed(priceDecimals)
@@ -74,6 +79,10 @@ export function OrderBook({
     }
   }, [bids, asks, displayDepth])
 
+  // Height of a side: fits content exactly (no gaps), capped by rowsVisible (then scrolls).
+  const sideHeight = (count: number) =>
+    Math.min(count, rowsVisible ?? count) * ROW_HEIGHT
+
   // Virtualized Asks Component (sells - top)
   const VirtualizedAsks = ({ asks }: { asks: ProcessedLevel[] }) => {
     const asksParentRef = React.useRef<HTMLDivElement>(null)
@@ -81,12 +90,12 @@ export function OrderBook({
     const asksVirtualizer = useVirtualizer({
       count: asks.length,
       getScrollElement: () => asksParentRef.current,
-      estimateSize: () => 24,
+      estimateSize: () => ROW_HEIGHT,
       measureElement: undefined,
     })
 
     return (
-      <div ref={asksParentRef} className="flex-1 overflow-auto">
+      <div ref={asksParentRef} className="overflow-auto" style={{ height: sideHeight(asks.length) }}>
         <div
           style={{
             height: asksVirtualizer.getTotalSize(),
@@ -129,12 +138,12 @@ export function OrderBook({
     const bidsVirtualizer = useVirtualizer({
       count: bids.length,
       getScrollElement: () => bidsParentRef.current,
-      estimateSize: () => 24,
+      estimateSize: () => ROW_HEIGHT,
       measureElement: undefined,
     })
 
     return (
-      <div ref={bidsParentRef} className="flex-1 overflow-auto">
+      <div ref={bidsParentRef} className="overflow-auto" style={{ height: sideHeight(bids.length) }}>
         <div
           style={{
             height: bidsVirtualizer.getTotalSize(),
@@ -171,8 +180,8 @@ export function OrderBook({
   }
 
   return (
-    <div className={cn('w-full h-full flex flex-col', className)}>
-      <div className="flex-1 flex flex-col space-y-1">
+    <div className={cn('w-full flex flex-col', className)}>
+      <div className="flex flex-col space-y-1">
         {/* Headers */}
         <div className="grid grid-cols-3 gap-2 text-xs font-medium text-muted-foreground px-2 py-1 border-b border-border">
           <div>Price</div>

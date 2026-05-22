@@ -28,6 +28,8 @@ export * from '@/components/ui/toggle'
 export * from '@/components/ui/tooltip'
 
 // Trading widgets
+export * from '@/components/trading/group-color-selector'
+export * from '@/components/trading/widget'
 export * from '@/components/trading/deals-list'
 export * from '@/components/trading/instrument-search'
 export * from '@/components/trading/order-book'

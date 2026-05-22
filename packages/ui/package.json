@@ -18,6 +18,14 @@
       "import": "./dist/index.js"
     },
     "./styles.css": "./dist/styles.css",
+    "./widget": {
+      "types": "./dist/widget.d.ts",
+      "import": "./dist/widget.js"
+    },
+    "./group-color-selector": {
+      "types": "./dist/group-color-selector.d.ts",
+      "import": "./dist/group-color-selector.js"
+    },
     "./tailwind-preset": "./tailwind-preset.cjs",
     "./accordion": {
       "types": "./dist/accordion.d.ts",

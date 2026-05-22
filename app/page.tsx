@@ -15,6 +15,13 @@ const sampleBids = [
   { price: 64009.5, amount: 0.517 },
   { price: 64008.0, amount: 2.114 },
   { price: 64006.5, amount: 0.933 },
+  { price: 64005.0, amount: 1.471 },
+  { price: 64003.5, amount: 0.688 },
+  { price: 64002.0, amount: 2.905 },
+  { price: 64000.5, amount: 0.412 },
+  { price: 63999.0, amount: 1.738 },
+  { price: 63997.5, amount: 0.95 },
+  { price: 63996.0, amount: 3.22 },
 ]
 const sampleAsks = [
   { price: 64014.0, amount: 0.621 },
@@ -22,6 +29,13 @@ const sampleAsks = [
   { price: 64017.0, amount: 0.444 },
   { price: 64018.5, amount: 1.762 },
   { price: 64020.0, amount: 0.298 },
+  { price: 64021.5, amount: 1.214 },
+  { price: 64023.0, amount: 0.733 },
+  { price: 64024.5, amount: 2.456 },
+  { price: 64026.0, amount: 0.519 },
+  { price: 64027.5, amount: 1.605 },
+  { price: 64029.0, amount: 0.877 },
+  { price: 64030.5, amount: 2.98 },
 ]
 const sampleCategories = [
   {
@@ -120,9 +134,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto items-stretch">
             <div className="rounded-3xl border border-border bg-card/40 p-4 backdrop-blur-xl">
               <p className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-3 px-2">Order Book · BTC/USDT</p>
-              <div className="h-[420px]">
-                <OrderBook bids={sampleBids} asks={sampleAsks} priceDecimals={1} amountDecimals={3} />
-              </div>
+              <OrderBook bids={sampleBids} asks={sampleAsks} priceDecimals={1} amountDecimals={3} />
             </div>
             <div className="rounded-3xl border border-border bg-card/40 p-6 backdrop-blur-xl">
               <Portfolio categories={sampleCategories} title="Balance" subtitle="Trading Portfolio" />
