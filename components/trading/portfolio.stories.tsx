@@ -40,7 +40,7 @@ export const Default: Story = {
         total: '13 404 600,00 ₽',
         share: '99,99%',
         items: [
-          { symbol: 'LQDT', name: 'LQDT', quantity: '8 250 000', price: '1,6248 ₽', avg: '1,3589 ₽', value: '13 404 600,00 ₽', share: '99,99%', profit: '2 193 526,50 ₽', profitPercent: '19,57%' },
+          { symbol: 'LQDT', name: 'LQDT', quantity: '8 250 000', price: '1,6248 ₽', avg: '1,3589 ₽', value: '13 404 600,00 ₽', share: '99,99%', profit: '2 193 526,50 ₽', profitPercent: '19,57%', color: 'rgba(156,39,176,0.3)' },
         ],
       },
     ],

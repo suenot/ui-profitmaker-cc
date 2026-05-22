@@ -24,7 +24,7 @@ const sampleCategories = [
     total: '13 404 600,00 ₽',
     share: '99,99%',
     items: [
-      { symbol: 'LQDT', name: 'LQDT', quantity: '8 250 000', price: '1,6248 ₽', avg: '1,3589 ₽', value: '13 404 600,00 ₽', share: '99,99%', profit: '2 193 526,50 ₽', profitPercent: '19,57%' },
+      { symbol: 'LQDT', name: 'LQDT', quantity: '8 250 000', price: '1,6248 ₽', avg: '1,3589 ₽', value: '13 404 600,00 ₽', share: '99,99%', profit: '2 193 526,50 ₽', profitPercent: '19,57%', color: 'rgba(156,39,176,0.3)' },
     ],
   },
 ]
@@ -67,6 +67,7 @@ export interface PortfolioAsset {
   share: string
   profit: string
   profitPercent: string
+  color?: string
 }
 
 export interface PortfolioCategory {
@@ -112,7 +113,7 @@ export default function PortfolioPage() {
 
       <h2 className="text-xl font-black tracking-tight mb-4 mt-10">Props</h2>
       <PropsTable props={[
-        { name: 'categories', type: 'PortfolioCategory[]', description: 'Expandable groups, each with id, name, total, share, and items[] of pre-formatted asset strings', required: true },
+        { name: 'categories', type: 'PortfolioCategory[]', description: 'Expandable groups, each with id, name, total, share, and items[] of pre-formatted asset strings. Each item accepts an optional color (CSS color string) for its avatar background', required: true },
         { name: 'title', type: 'string', defaultValue: "'Balance'", description: 'Header title' },
         { name: 'subtitle', type: 'string', defaultValue: "'Trading Portfolio'", description: 'Header subtitle' },
         { name: 'todayChange', type: '{ value, percent }', description: "Today stat card values, e.g. { value: '8 248,37 ₽', percent: '0,06%' }" },

@@ -48,13 +48,17 @@ export interface OrderFormProps {
   stepSize?: number
   available?: number
   maxAmount?: number
+  minAmount?: number
+  minPrice?: number
   onSubmit?: (values: OrderFormValues) => void
   className?: string
 }
 
 // Market/Limit/Stop tabs, price + quantity (with steppers) fields, advanced
 // stop-loss/take-profit options, estimated cost & commission, and Buy/Sell
-// buttons. State is local; emits onSubmit on a valid Buy/Sell click.`
+// buttons. State is local; emits onSubmit on a valid Buy/Sell click. Invalid
+// fields show a red border and message after blur or submit (amount > 0 /
+// >= minAmount; price > 0 / >= minPrice for limit & stop orders).`
 
 export default function OrderFormPage() {
   return (
@@ -85,6 +89,8 @@ export default function OrderFormPage() {
         { name: 'stepSize', type: 'number', defaultValue: '0.00000001', description: 'Quantity increment used by the – / + steppers' },
         { name: 'available', type: 'number', description: 'Available balance; renders the Available/Max grid when set' },
         { name: 'maxAmount', type: 'number', description: 'Max order amount; renders the Available/Max grid when set' },
+        { name: 'minAmount', type: 'number', description: 'Minimum order amount; amount below this fails validation' },
+        { name: 'minPrice', type: 'number', description: 'Minimum price for limit/stop orders; price below this fails validation' },
         { name: 'onSubmit', type: '(values: OrderFormValues) => void', description: 'Called on a valid Buy/Sell click' },
         { name: 'className', type: 'string', description: 'Additional CSS classes' },
       ]} />

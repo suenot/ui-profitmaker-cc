@@ -24,6 +24,8 @@ export interface OrderFormProps {
   stepSize?: number
   available?: number
   maxAmount?: number
+  minAmount?: number
+  minPrice?: number
   onSubmit?: (values: OrderFormValues) => void
   className?: string
 }
@@ -47,6 +49,8 @@ export function OrderForm({
   stepSize = 0.00000001,
   available,
   maxAmount,
+  minAmount,
+  minPrice,
   onSubmit,
   className,
 }: OrderFormProps) {
@@ -66,6 +70,11 @@ export function OrderForm({
     takeProfit: { enabled: false },
   })
   const [lastOrderResponse, setLastOrderResponse] = React.useState<OrderResponse | null>(null)
+  const [touched, setTouched] = React.useState<{ price: boolean; amount: boolean }>({
+    price: false,
+    amount: false,
+  })
+  const [submitted, setSubmitted] = React.useState(false)
 
   const baseCurrency = symbol.split('/')[0] || ''
   const quoteCurrency = symbol.split('/')[1] || ''
@@ -77,11 +86,26 @@ export function OrderForm({
 
   const commission = React.useMemo(() => estimatedCost * 0.001, [estimatedCost])
 
-  const isFormValid =
-    formData.amount > 0 &&
-    (formData.type === 'market' ||
-      (formData.type === 'limit' && formData.price > 0) ||
-      (formData.type === 'stop_loss' && formData.stopPrice > 0))
+  const usesPrice = formData.type === 'limit' || formData.type === 'stop_loss'
+  const priceValue = formData.type === 'stop_loss' ? formData.stopPrice : formData.price
+
+  const amountError = React.useMemo(() => {
+    if (formData.amount <= 0) return 'Amount must be greater than 0'
+    if (minAmount !== undefined && formData.amount < minAmount) return `Amount must be at least ${minAmount}`
+    return undefined
+  }, [formData.amount, minAmount])
+
+  const priceError = React.useMemo(() => {
+    if (!usesPrice) return undefined
+    if (priceValue <= 0) return 'Price must be greater than 0'
+    if (minPrice !== undefined && priceValue < minPrice) return `Price must be at least ${minPrice}`
+    return undefined
+  }, [usesPrice, priceValue, minPrice])
+
+  const showAmountError = (touched.amount || submitted) && !!amountError
+  const showPriceError = (touched.price || submitted) && !!priceError
+
+  const isFormValid = !amountError && !priceError
 
   const handleQuantityAdjust = (delta: number) => {
     const newAmount = Math.max(0, formData.amount + delta * stepSize)
@@ -89,6 +113,7 @@ export function OrderForm({
   }
 
   const handleSubmit = (side: OrderSide) => {
+    setSubmitted(true)
     if (!isFormValid) return
     setFormData((prev) => ({ ...prev, side }))
     const values: OrderFormValues = {
@@ -153,7 +178,10 @@ export function OrderForm({
               <input
                 type="number"
                 step={stepSize}
-                className="w-full bg-muted/30 border border-border rounded-md py-2 px-3 text-sm"
+                className={cn(
+                  'w-full bg-muted/30 border rounded-md py-2 px-3 text-sm',
+                  showPriceError ? 'border-red-500' : 'border-border',
+                )}
                 value={formData.type === 'stop_loss' ? formData.stopPrice || '' : formData.price || ''}
                 onChange={(e) => {
                   const value = parseFloat(e.target.value) || 0
@@ -161,9 +189,11 @@ export function OrderForm({
                     formData.type === 'stop_loss' ? { ...prev, stopPrice: value } : { ...prev, price: value },
                   )
                 }}
+                onBlur={() => setTouched((prev) => ({ ...prev, price: true }))}
                 placeholder={`Enter ${formData.type === 'stop_loss' ? 'stop' : 'limit'} price`}
               />
             </div>
+            {showPriceError && <p className="text-xs text-red-500 mt-1">{priceError}</p>}
           </div>
         )}
 
@@ -187,10 +217,14 @@ export function OrderForm({
             <input
               type="number"
               step={stepSize}
-              className="w-full bg-muted/30 border border-border rounded-md py-2 px-3 pr-16 text-sm"
+              className={cn(
+                'w-full bg-muted/30 border rounded-md py-2 px-3 pr-16 text-sm',
+                showAmountError ? 'border-red-500' : 'border-border',
+              )}
               value={formData.amount || ''}
               onChange={(e) => setFormData((prev) => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
-              placeholder="Min: 0"
+              onBlur={() => setTouched((prev) => ({ ...prev, amount: true }))}
+              placeholder={`Min: ${minAmount ?? 0}`}
             />
             <div className="absolute right-0 h-full flex">
               <button
@@ -209,6 +243,7 @@ export function OrderForm({
               </button>
             </div>
           </div>
+          {showAmountError && <p className="text-xs text-red-500 mt-1">{amountError}</p>}
         </div>
 
         {/* Advanced Options Toggle */}
@@ -383,16 +418,14 @@ export function OrderForm({
         <div className="grid grid-cols-2 gap-3 mt-auto pt-4">
           <button
             type="button"
-            disabled={!isFormValid}
-            className="w-full py-2.5 rounded-md font-medium bg-green-500 hover:bg-green-500/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-white"
+            className="w-full py-2.5 rounded-md font-medium bg-green-500 hover:bg-green-500/90 transition-colors text-white"
             onClick={() => handleSubmit('buy')}
           >
             Buy {baseCurrency}
           </button>
           <button
             type="button"
-            disabled={!isFormValid}
-            className="w-full py-2.5 rounded-md font-medium bg-red-500 hover:bg-red-500/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-white"
+            className="w-full py-2.5 rounded-md font-medium bg-red-500 hover:bg-red-500/90 transition-colors text-white"
             onClick={() => handleSubmit('sell')}
           >
             Sell {baseCurrency}

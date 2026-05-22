@@ -1,7 +1,7 @@
 {
   "name": "@profitmaker/ui",
-  "version": "0.1.0",
-  "description": "Trading-focused React component library behind profitmaker.cc \u2014 primitives plus live trading widgets (order book, order form, portfolio, deals list).",
+  "version": "0.2.0",
+  "description": "Trading-focused React component library behind profitmaker.cc — primitives plus live trading widgets (order book, order form, portfolio, deals list).",
   "license": "MIT",
   "type": "module",
   "sideEffects": [

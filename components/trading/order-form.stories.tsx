@@ -37,3 +37,19 @@ export const WithBalance: Story = {
     onSubmit: (values) => console.log(values),
   },
 }
+
+export const ValidationErrors: Story = {
+  args: {
+    symbol: 'BTC/USDT',
+    exchange: 'binance',
+    market: 'spot',
+    stepSize: 0.0001,
+    minAmount: 0.01,
+    minPrice: 1,
+    onSubmit: (values) => console.log(values),
+  },
+  play: async ({ canvasElement }) => {
+    const buyButton = canvasElement.querySelector('button.bg-green-500') as HTMLButtonElement | null
+    buyButton?.click()
+  },
+}

@@ -14,6 +14,7 @@ export interface PortfolioAsset {
   share: string
   profit: string
   profitPercent: string
+  color?: string
 }
 
 export interface PortfolioCategory {
@@ -56,7 +57,7 @@ const defaultCategories: PortfolioCategory[] = [
     total: '13 404 600,00 ₽',
     share: '99,99%',
     items: [
-      { symbol: 'LQDT', name: 'LQDT', quantity: '8 250 000', price: '1,6248 ₽', avg: '1,3589 ₽', value: '13 404 600,00 ₽', share: '99,99%', profit: '2 193 526,50 ₽', profitPercent: '19,57%' },
+      { symbol: 'LQDT', name: 'LQDT', quantity: '8 250 000', price: '1,6248 ₽', avg: '1,3589 ₽', value: '13 404 600,00 ₽', share: '99,99%', profit: '2 193 526,50 ₽', profitPercent: '19,57%', color: 'rgba(156,39,176,0.3)' },
     ],
   },
 ]
@@ -155,7 +156,13 @@ export function Portfolio({
                     className="grid grid-cols-8 py-2 text-sm border-t border-border/30 hover:bg-muted/10"
                   >
                     <div className="col-span-1 flex items-center">
-                      <div className="mr-2 w-6 h-6 rounded-full bg-muted flex items-center justify-center text-xs">
+                      <div
+                        className={cn(
+                          'mr-2 w-6 h-6 rounded-full flex items-center justify-center text-xs',
+                          !item.color && 'bg-muted',
+                        )}
+                        style={item.color ? { backgroundColor: item.color } : undefined}
+                      >
                         {avatarLabel(item.symbol)}
                       </div>
                       <div>
