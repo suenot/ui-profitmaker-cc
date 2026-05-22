@@ -25,7 +25,7 @@ export default function Example() {
 const sourceCode = `'use client'
 
 import * as React from 'react'
-import { Settings, Minus, Maximize2, X } from 'lucide-react'
+import { Search, Settings, Minus, Maximize2, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { GroupColorSelector, DEFAULT_GROUPS, type Group } from './group-color-selector'
 
@@ -38,6 +38,8 @@ export interface WidgetProps {
   defaultGroupId?: string
   onGroupChange?: (groupId: string | undefined) => void
   showGroupSelector?: boolean
+  showInstrumentSearch?: boolean
+  onInstrumentSearch?: () => void
   onTitleChange?: (title: string) => void
   headerActions?: React.ReactNode
   onSettings?: () => void
@@ -48,9 +50,10 @@ export interface WidgetProps {
   contentClassName?: string
 }
 
-// Terminal panel shell, ported from profitmaker.cc. The group color shows in the
-// header dot; picking a non-transparent group gives the header a subtle accent
-// background. Double-click the title to rename it inline.`
+// Terminal panel shell, ported from profitmaker.cc. Header chrome: a group-color
+// dot + an instrument-search (magnifier) icon on the left, then the title
+// (double-click to rename), then settings / minimize / maximize / close on the
+// right. Picking a non-transparent group tints the header with a subtle accent.`
 
 function Demo() {
   const [a, setA] = useState<string | undefined>('blue')
@@ -99,6 +102,8 @@ export default function WidgetPage() {
         { name: 'defaultGroupId', type: 'string', description: 'Initial group id when uncontrolled' },
         { name: 'onGroupChange', type: '(groupId?: string) => void', description: 'Called when the group color changes' },
         { name: 'showGroupSelector', type: 'boolean', defaultValue: 'true', description: 'Show the group color dot' },
+        { name: 'showInstrumentSearch', type: 'boolean', defaultValue: 'true', description: 'Show the instrument-search (magnifier) icon next to the group dot' },
+        { name: 'onInstrumentSearch', type: '() => void', description: 'Called when the header search icon is clicked' },
         { name: 'headerActions', type: 'ReactNode', description: 'Extra controls in the header' },
         { name: 'onSettings / onMinimize / onClose', type: '() => void', description: 'Show the matching header action icon when provided' },
         { name: 'className', type: 'string', description: 'Classes for the widget shell' },

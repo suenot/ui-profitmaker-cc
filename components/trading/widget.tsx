@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Settings, Minus, Maximize2, X } from 'lucide-react'
+import { Search, Settings, Minus, Maximize2, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { GroupColorSelector, DEFAULT_GROUPS, type Group } from './group-color-selector'
 
@@ -16,6 +16,10 @@ export interface WidgetProps {
   defaultGroupId?: string
   onGroupChange?: (groupId: string | undefined) => void
   showGroupSelector?: boolean
+  /** Show the instrument-search (magnifier) control next to the group dot. */
+  showInstrumentSearch?: boolean
+  /** Called when the header instrument-search icon is clicked. */
+  onInstrumentSearch?: () => void
   /** Called when the title is edited (double-click the title to edit). */
   onTitleChange?: (title: string) => void
   headerActions?: React.ReactNode
@@ -36,6 +40,8 @@ export function Widget({
   defaultGroupId,
   onGroupChange,
   showGroupSelector = true,
+  showInstrumentSearch = true,
+  onInstrumentSearch,
   onTitleChange,
   headerActions,
   onSettings,
@@ -106,6 +112,16 @@ export function Widget({
               groups={groups}
               className="flex-shrink-0"
             />
+          )}
+          {showInstrumentSearch && (
+            <button
+              type="button"
+              onClick={onInstrumentSearch}
+              className="flex-shrink-0 rounded-sm p-0.5 text-muted-foreground transition-colors hover:text-foreground"
+              title="Search instrument"
+            >
+              <Search size={14} />
+            </button>
           )}
           {instrument && (
             <span className="flex-shrink-0 text-xs text-muted-foreground">{instrument}</span>
