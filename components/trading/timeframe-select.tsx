@@ -44,6 +44,15 @@ export function TimeframeSelect({
     }))
   }, [availableTimeframes])
 
+  // If the current value isn't available, fall back to the first option (and notify).
+  const currentValue = useMemo(() => {
+    if (options.length === 0) return value
+    if (options.some((tf) => tf.id === value)) return value
+    const first = options[0].id
+    setTimeout(() => onChange(first), 0)
+    return first
+  }, [value, options, onChange])
+
   return (
     <div
       className={cn(
@@ -54,7 +63,7 @@ export function TimeframeSelect({
     >
       <Clock className="pointer-events-none ml-1 h-3 w-3 text-muted-foreground" />
       <select
-        value={value}
+        value={currentValue}
         onChange={(e) => onChange(e.target.value)}
         className="min-w-[2.5rem] cursor-pointer appearance-none border-none bg-transparent px-1 py-1 text-sm text-foreground outline-none"
         style={{
