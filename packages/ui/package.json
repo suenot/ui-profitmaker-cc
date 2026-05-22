@@ -27,6 +27,14 @@
       "types": "./dist/group-color-selector.d.ts",
       "import": "./dist/group-color-selector.js"
     },
+    "./footprint": {
+      "types": "./dist/footprint.d.ts",
+      "import": "./dist/footprint.js"
+    },
+    "./heatmap": {
+      "types": "./dist/heatmap.d.ts",
+      "import": "./dist/heatmap.js"
+    },
     "./tailwind-preset": "./tailwind-preset.cjs",
     "./accordion": {
       "types": "./dist/accordion.d.ts",
