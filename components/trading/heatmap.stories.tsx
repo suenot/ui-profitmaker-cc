@@ -26,16 +26,17 @@ function makeBook(sliceCount = 60, tick = 1, depth = 40) {
     mid += (Math.sin(i * 0.2) * 2 + (Math.random() - 0.5) * 3)
     const center = Math.round(mid / tick) * tick
     const time = base + i * 1000
-    const levels: { price: number; size: number }[] = []
+    const levels: { price: number; size: number; side: 'bid' | 'ask' }[] = []
     for (let k = -depth; k <= depth; k++) {
+      if (k === 0) continue
       const price = center + k * tick
       const dist = Math.abs(k)
-      // Two liquidity walls plus decaying depth away from mid.
+      // Decaying depth away from mid, plus a couple of resting "walls".
       let size = Math.max(0, 60 - dist * 1.4) + Math.random() * 20
       if (dist === 8 || dist === 14) size += 120 + Math.random() * 60
-      levels.push({ price, size })
+      levels.push({ price, size, side: k > 0 ? 'ask' : 'bid' })
     }
-    slices.push({ time, levels })
+    slices.push({ time, mid: center, levels })
 
     if (Math.random() < 0.5) {
       trades.push({
@@ -52,13 +53,13 @@ function makeBook(sliceCount = 60, tick = 1, depth = 40) {
 const { slices, trades } = makeBook()
 
 export const Default: Story = {
-  args: { slices, priceDecimals: 0, tickSize: 1, colorScale: 'heat', showTrades: false },
+  args: { slices, trades, priceDecimals: 0, tickSize: 1, colorScale: 'side', showTrades: true },
 }
 
-export const WithTrades: Story = {
+export const Heat: Story = {
   args: { slices, trades, priceDecimals: 0, tickSize: 1, colorScale: 'heat', showTrades: true },
 }
 
 export const Mono: Story = {
-  args: { slices, priceDecimals: 0, tickSize: 1, colorScale: 'mono', showTrades: false },
+  args: { slices, priceDecimals: 0, tickSize: 1, colorScale: 'mono', showTrades: false, showDepth: false },
 }

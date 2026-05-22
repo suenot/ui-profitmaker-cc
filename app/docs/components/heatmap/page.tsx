@@ -15,15 +15,16 @@ function makeBook(sliceCount = 60, tick = 1, depth = 36) {
     mid += Math.sin(i * 0.2) * 2 + ((i * 7) % 5) - 2
     const center = Math.round(mid / tick) * tick
     const time = base + i * 1000
-    const levels: { price: number; size: number }[] = []
+    const levels: { price: number; size: number; side: 'bid' | 'ask' }[] = []
     for (let k = -depth; k <= depth; k++) {
+      if (k === 0) continue
       const price = center + k * tick
       const dist = Math.abs(k)
       let size = Math.max(0, 60 - dist * 1.4) + ((i + price) % 18)
       if (dist === 8 || dist === 14) size += 130
-      levels.push({ price, size })
+      levels.push({ price, size, side: k > 0 ? 'ask' : 'bid' })
     }
-    slices.push({ time, levels })
+    slices.push({ time, mid: center, levels })
     if (i % 2 === 0) {
       trades.push({
         time,
@@ -42,19 +43,20 @@ const previewCode = `import { Heatmap } from '@/components/trading/heatmap'
 
 export default function Example() {
   return (
-    <div className="w-[600px] h-[360px] rounded-md border border-border bg-card overflow-hidden">
+    <div className="w-[600px] h-[360px] rounded-md border border-border overflow-hidden">
       <Heatmap
         priceDecimals={0}
         tickSize={1}
-        colorScale="heat"
+        colorScale="side"  // red asks above mid, green bids below
         showTrades
         slices={[
           {
             time: Date.now(),
+            mid: 67236,
             levels: [
-              { price: 67238, size: 40 },
-              { price: 67237, size: 180 }, // liquidity wall = hot cell
-              { price: 67236, size: 55 },
+              { price: 67238, size: 40, side: 'ask' },
+              { price: 67237, size: 180, side: 'ask' }, // bright resting wall
+              { price: 67235, size: 55, side: 'bid' },
               // ...one slice per time column
             ],
           },
@@ -70,9 +72,16 @@ const sourceCode = `'use client'
 import * as React from 'react'
 import { cn } from '@/lib/utils'
 
+export interface HeatmapLevel {
+  price: number
+  size: number
+  side?: 'bid' | 'ask' // else derived from the slice mid
+}
+
 export interface HeatmapSlice {
   time: number
-  levels: { price: number; size: number }[]
+  mid?: number // splits bids (below) from asks (above)
+  levels: HeatmapLevel[]
 }
 
 export interface HeatmapTrade {
@@ -87,14 +96,17 @@ export interface HeatmapProps {
   trades?: HeatmapTrade[]
   priceDecimals?: number
   tickSize?: number
-  colorScale?: 'heat' | 'mono'
+  colorScale?: 'side' | 'heat' | 'mono'
   showTrades?: boolean
+  showDepth?: boolean
   className?: string
 }
 
-// Canvas time×price liquidity heatmap: columns are time slices, rows are price
-// ticks, cell intensity tracks resting size. Optional trade dots (sized by
-// volume, colored by side) and a dashed best-price line from the last slice.`
+// Canvas time×price depth heatmap. Resting liquidity is colored by side — red
+// asks above the mid, green bids below — with brightness tracking size, so big
+// resting orders read as bright "walls". A mid-price path connects the slices,
+// trades overlay as side-colored dots sized by volume, and the live book is
+// drawn as a depth histogram at the right edge.`
 
 export default function HeatmapPage() {
   return (
@@ -102,15 +114,15 @@ export default function HeatmapPage() {
       <Badge className="mb-4">Trading</Badge>
       <h1 className="text-4xl font-black tracking-tight mb-4">Heatmap</h1>
       <p className="text-lg text-muted-foreground font-light leading-relaxed mb-8">
-        Historical depth-of-market heatmap. Time runs left-to-right, price top-to-bottom, and cell color tracks resting
-        order-book liquidity. Overlay live trades as dots sized by volume and colored by
-        <code className="bg-muted px-1.5 py-0.5 rounded font-mono text-sm">side</code>.
+        Historical depth-of-market heatmap. Time runs left-to-right, price top-to-bottom. Resting liquidity is colored by
+        side — <span className="text-red-400">red asks</span> above the mid, <span className="text-green-400">green bids</span> below —
+        with brightness tracking size. Trades overlay as dots sized by volume, and the live book shows as a depth histogram at the right edge.
       </p>
 
       <h2 className="text-xl font-black tracking-tight mb-4 mt-10">Preview</h2>
-      <ComponentPreview code={previewCode} storyId="trading-heatmap--with-trades" previewClassName="min-h-[420px]">
-        <div className="w-[600px] h-[360px] rounded-md border border-border bg-card overflow-hidden">
-          <Heatmap slices={slices} trades={trades} priceDecimals={0} tickSize={1} colorScale="heat" showTrades />
+      <ComponentPreview code={previewCode} storyId="trading-heatmap--default" previewClassName="min-h-[420px]">
+        <div className="w-[600px] h-[360px] rounded-md border border-border overflow-hidden">
+          <Heatmap slices={slices} trades={trades} priceDecimals={0} tickSize={1} colorScale="side" showTrades />
         </div>
       </ComponentPreview>
 
@@ -120,12 +132,13 @@ export default function HeatmapPage() {
 
       <h2 className="text-xl font-black tracking-tight mb-4 mt-10">Props</h2>
       <PropsTable props={[
-        { name: 'slices', type: 'HeatmapSlice[]', description: 'Time slices (oldest→newest), each a snapshot of resting size per price', required: true },
+        { name: 'slices', type: 'HeatmapSlice[]', description: 'Time slices (oldest→newest); each has a mid and resting size per price level', required: true },
         { name: 'trades', type: 'HeatmapTrade[]', description: 'Optional executed trades overlaid as dots' },
         { name: 'priceDecimals', type: 'number', defaultValue: '2', description: 'Decimals for the price axis labels' },
         { name: 'tickSize', type: 'number', description: 'Price step between rows (auto-inferred if omitted)' },
-        { name: 'colorScale', type: "'heat' | 'mono'", defaultValue: "'heat'", description: 'Perceptual heat ramp or a single-accent mono ramp' },
+        { name: 'colorScale', type: "'side' | 'heat' | 'mono'", defaultValue: "'side'", description: 'Side coloring (flowsurface-style), a heat ramp, or single-accent mono' },
         { name: 'showTrades', type: 'boolean', defaultValue: 'true', description: 'Draw trade dots when trades are provided' },
+        { name: 'showDepth', type: 'boolean', defaultValue: 'true', description: 'Draw the live order-book depth histogram at the right edge' },
         { name: 'className', type: 'string', description: 'Additional CSS classes' },
       ]} />
     </div>

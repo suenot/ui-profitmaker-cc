@@ -3,9 +3,18 @@
 import * as React from 'react'
 import { cn } from '@/lib/utils'
 
+export interface HeatmapLevel {
+  price: number
+  size: number
+  /** Optional explicit side; otherwise derived from the slice mid (>= mid → ask). */
+  side?: 'bid' | 'ask'
+}
+
 export interface HeatmapSlice {
   time: number
-  levels: { price: number; size: number }[]
+  /** Mid / last price used to split bids (below) from asks (above). */
+  mid?: number
+  levels: HeatmapLevel[]
 }
 
 export interface HeatmapTrade {
@@ -20,8 +29,11 @@ export interface HeatmapProps {
   trades?: HeatmapTrade[]
   priceDecimals?: number
   tickSize?: number
-  colorScale?: 'heat' | 'mono'
+  /** 'side' (flowsurface-style red asks / green bids), 'heat' ramp, or 'mono'. */
+  colorScale?: 'side' | 'heat' | 'mono'
   showTrades?: boolean
+  /** Draw the live order-book depth histogram at the right edge. */
+  showDepth?: boolean
   className?: string
 }
 
@@ -37,10 +49,19 @@ function cssVar(el: HTMLElement, name: string, fallback: string): string {
   return v ? `hsl(${v})` : fallback
 }
 
-// Perceptual-ish ramp dark -> blue -> cyan -> yellow -> white.
+function lerp(a: number, b: number, t: number) {
+  return Math.round(a + (b - a) * t)
+}
+
+// Side colors: dark resting fill -> bright wall, like a depth heatmap.
+const ASK_DARK: [number, number, number] = [54, 18, 24]
+const ASK_BRIGHT: [number, number, number] = [255, 86, 96]
+const BID_DARK: [number, number, number] = [14, 44, 30]
+const BID_BRIGHT: [number, number, number] = [74, 226, 140]
+
 function heatColor(t: number): [number, number, number] {
   const stops: [number, [number, number, number]][] = [
-    [0, [10, 12, 30]],
+    [0, [8, 10, 24]],
     [0.35, [30, 60, 170]],
     [0.6, [40, 190, 210]],
     [0.82, [240, 220, 60]],
@@ -51,11 +72,7 @@ function heatColor(t: number): [number, number, number] {
       const [t0, c0] = stops[i - 1]
       const [t1, c1] = stops[i]
       const f = (t - t0) / (t1 - t0 || 1)
-      return [
-        Math.round(c0[0] + (c1[0] - c0[0]) * f),
-        Math.round(c0[1] + (c1[1] - c0[1]) * f),
-        Math.round(c0[2] + (c1[2] - c0[2]) * f),
-      ]
+      return [lerp(c0[0], c1[0], f), lerp(c0[1], c1[1], f), lerp(c0[2], c1[2], f)]
     }
   }
   return stops[stops.length - 1][1]
@@ -66,13 +83,14 @@ export function Heatmap({
   trades = [],
   priceDecimals = 2,
   tickSize,
-  colorScale = 'heat',
+  colorScale = 'side',
   showTrades = true,
+  showDepth = true,
   className,
 }: HeatmapProps) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null)
   const containerRef = React.useRef<HTMLDivElement>(null)
-  const [size, setSize] = React.useState<Sized>({ width: 600, height: 360 })
+  const [size, setSize] = React.useState<Sized>({ width: 640, height: 380 })
 
   React.useEffect(() => {
     const el = containerRef.current
@@ -102,20 +120,19 @@ export function Heatmap({
 
     const muted = cssVar(host, '--muted-foreground', '#9ca3af')
     const border = cssVar(host, '--border', '#27272a')
-    const accent = cssVar(host, '--accent', '#fbbf24') || '#fbbf24'
 
     if (slices.length === 0) return
 
     const allPrices = slices.flatMap((s) => s.levels.map((l) => l.price))
-    if (trades) for (const tr of trades) allPrices.push(tr.price)
+    for (const tr of trades) allPrices.push(tr.price)
     const minPrice = Math.min(...allPrices)
     const maxPrice = Math.max(...allPrices)
     const step =
       tickSize ??
       (() => {
-        const sorted = Array.from(new Set(slices.flatMap((s) => s.levels.map((l) => l.price)))).sort(
-          (a, b) => a - b
-        )
+        const sorted = Array.from(
+          new Set(slices.flatMap((s) => s.levels.map((l) => l.price)))
+        ).sort((a, b) => a - b)
         let min = Infinity
         for (let i = 1; i < sorted.length; i++) min = Math.min(min, sorted[i] - sorted[i - 1])
         return Number.isFinite(min) && min > 0 ? min : 1
@@ -125,33 +142,68 @@ export function Heatmap({
     const cw = plotW / slices.length
     const rowCount = Math.max(1, Math.round((maxPrice - minPrice) / step) + 1)
     const rh = size.height / rowCount
-
     const yForPrice = (price: number) => ((maxPrice - price) / step) * rh
+
+    const sliceMid = (s: HeatmapSlice) =>
+      s.mid ?? (s.levels.length ? (Math.min(...s.levels.map((l) => l.price)) + Math.max(...s.levels.map((l) => l.price))) / 2 : 0)
 
     let maxSize = 0
     for (const s of slices) for (const l of s.levels) maxSize = Math.max(maxSize, l.size)
     maxSize = maxSize || 1
 
-    // Background fill for empty area.
-    const [br, bg, bb] = colorScale === 'heat' ? heatColor(0) : [18, 18, 22]
-    ctx.fillStyle = `rgb(${br},${bg},${bb})`
+    // Near-black background.
+    ctx.fillStyle = '#08090c'
     ctx.fillRect(0, 0, plotW, size.height)
+
+    const cellColor = (l: HeatmapLevel, mid: number, t: number): string => {
+      if (colorScale === 'heat') {
+        const [r, g, b] = heatColor(t)
+        return `rgb(${r},${g},${b})`
+      }
+      if (colorScale === 'mono') return `rgba(74,222,128,${0.08 + 0.9 * t})`
+      const isAsk = l.side ? l.side === 'ask' : l.price >= mid
+      const [dk, br] = isAsk ? [ASK_DARK, ASK_BRIGHT] : [BID_DARK, BID_BRIGHT]
+      const f = Math.pow(t, 0.8)
+      return `rgb(${lerp(dk[0], br[0], f)},${lerp(dk[1], br[1], f)},${lerp(dk[2], br[2], f)})`
+    }
 
     slices.forEach((slice, si) => {
       const x = si * cw
+      const mid = sliceMid(slice)
       for (const l of slice.levels) {
         const t = Math.min(1, l.size / maxSize)
         if (t <= 0) continue
-        const y = yForPrice(l.price)
-        if (colorScale === 'heat') {
-          const [r, g, b] = heatColor(t)
-          ctx.fillStyle = `rgb(${r},${g},${b})`
-        } else {
-          ctx.fillStyle = `rgba(74,222,128,${0.1 + 0.85 * t})`
-        }
-        ctx.fillRect(Math.floor(x), Math.floor(y), Math.ceil(cw) + 1, Math.ceil(rh) + 1)
+        ctx.fillStyle = cellColor(l, mid, t)
+        ctx.fillRect(Math.floor(x), Math.floor(yForPrice(l.price)), Math.ceil(cw) + 1, Math.ceil(rh) + 1)
       }
     })
+
+    // Mid-price path across time.
+    ctx.strokeStyle = 'rgba(220,225,235,0.35)'
+    ctx.lineWidth = 1
+    ctx.beginPath()
+    slices.forEach((slice, si) => {
+      const x = si * cw + cw / 2
+      const y = yForPrice(sliceMid(slice)) + rh / 2
+      if (si === 0) ctx.moveTo(x, y)
+      else ctx.lineTo(x, y)
+    })
+    ctx.stroke()
+
+    // Live order-book depth histogram at the right edge (from the last slice).
+    const last = slices[slices.length - 1]
+    if (showDepth && last && last.levels.length) {
+      const mid = sliceMid(last)
+      const lastMax = Math.max(...last.levels.map((l) => l.size)) || 1
+      const maxBar = Math.min(120, plotW * 0.28)
+      for (const l of last.levels) {
+        const isAsk = l.side ? l.side === 'ask' : l.price >= mid
+        const w = (l.size / lastMax) * maxBar
+        if (w < 0.5) continue
+        ctx.fillStyle = isAsk ? 'rgba(255,86,96,0.85)' : 'rgba(74,226,140,0.85)'
+        ctx.fillRect(plotW - w, Math.floor(yForPrice(l.price)), w, Math.max(1, Math.ceil(rh)))
+      }
+    }
 
     // Trade dots.
     if (showTrades && trades.length) {
@@ -164,23 +216,18 @@ export function Heatmap({
       for (const tr of trades) {
         const x = ((tr.time - tMin) / span) * plotW
         const y = yForPrice(tr.price) + rh / 2
-        const radius = 2 + 5 * Math.min(1, tr.size / maxTrade)
+        const radius = 2 + 9 * Math.sqrt(Math.min(1, tr.size / maxTrade))
         ctx.beginPath()
         ctx.arc(x, y, radius, 0, Math.PI * 2)
-        ctx.fillStyle = tr.side === 'buy' ? 'rgba(74,222,128,0.9)' : 'rgba(248,113,113,0.9)'
+        ctx.fillStyle = tr.side === 'buy' ? 'rgba(74,226,140,0.9)' : 'rgba(255,86,96,0.9)'
         ctx.fill()
-        ctx.strokeStyle = 'rgba(0,0,0,0.4)'
-        ctx.lineWidth = 0.5
-        ctx.stroke()
       }
     }
 
-    // Best bid/ask line from the most recent slice (max-size cluster center).
-    const last = slices[slices.length - 1]
-    if (last && last.levels.length) {
-      const mid = last.levels.reduce((a, b) => (b.size > a.size ? b : a), last.levels[0])
-      const y = yForPrice(mid.price) + rh / 2
-      ctx.strokeStyle = accent
+    // Current price marker on the axis.
+    if (last) {
+      const y = yForPrice(sliceMid(last)) + rh / 2
+      ctx.strokeStyle = 'rgba(220,225,235,0.5)'
       ctx.setLineDash([4, 3])
       ctx.lineWidth = 1
       ctx.beginPath()
@@ -207,13 +254,10 @@ export function Heatmap({
     ctx.moveTo(plotW + 0.5, 0)
     ctx.lineTo(plotW + 0.5, size.height)
     ctx.stroke()
-  }, [slices, trades, priceDecimals, tickSize, colorScale, showTrades, size])
+  }, [slices, trades, priceDecimals, tickSize, colorScale, showTrades, showDepth, size])
 
   return (
-    <div
-      ref={containerRef}
-      className={cn('relative w-full h-full bg-card text-foreground', className)}
-    >
+    <div ref={containerRef} className={cn('relative w-full h-full bg-[#08090c] text-foreground', className)}>
       <canvas ref={canvasRef} className="block" />
     </div>
   )
